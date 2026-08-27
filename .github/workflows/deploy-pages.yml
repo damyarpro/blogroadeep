@@ -1,9 +1,11 @@
 name: Deploy static demo to GitHub Pages
 
 # Builds the frontend as a backend-free static demo (VITE_STATIC_DATA=true, served
-# from public/data/ JSON snapshots) and publishes it to GitHub Pages at
-# https://damyarpro.github.io/blogroadeep/. The normal Django-backed dev/prod build
-# is untouched by this workflow.
+# from public/data/ JSON snapshots) and publishes it to the gh-pages branch, which
+# GitHub serves at https://damyarpro.github.io/blogroadeep/. The branch-based
+# publish is used (instead of actions/deploy-pages) because creating the gh-pages
+# branch auto-enables Pages, while the workflow token is not allowed to enable
+# Pages through the API. The normal Django-backed dev/prod build is untouched.
 
 on:
   push:
@@ -11,16 +13,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,11 +37,6 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Build static demo
         working-directory: frontend
         env:
@@ -49,18 +44,12 @@ jobs:
           VITE_BASE: /blogroadeep/
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: frontend/dist
+      - name: Add .nojekyll
+        run: touch frontend/dist/.nojekyll
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: frontend/dist
+          force_orphan: true
