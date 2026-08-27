@@ -26,6 +26,35 @@ npm run build   # tsc -b && vite build — must pass with zero TypeScript errors
 npm run preview # serve the production build locally
 ```
 
+The build always copies `dist/index.html` to `dist/404.html` (a `vite.config.ts` plugin),
+which is what makes client-side routing survive a hard refresh on GitHub Pages.
+
+## Static demo mode (GitHub Pages)
+
+The app can also be built as a fully static, backend-free demo — served at
+https://damyarpro.github.io/blogroadeep/ by `.github/workflows/deploy-pages.yml` on
+every push to `main`. In this mode `src/lib/api.ts` reads from the pre-fetched JSON
+snapshot in `public/data/` (`posts.json`, `categories.json`, `tags.json`) instead of
+calling Django, doing search/filter/sort/pagination client-side. Every page's public
+function signature is unchanged, so components don't know which mode is active.
+
+```bash
+VITE_STATIC_DATA=true VITE_BASE=/blogroadeep/ npm run build
+```
+
+- `VITE_STATIC_DATA=true` switches `src/lib/api.ts` to the static snapshot.
+- `VITE_BASE` sets Vite's `base` (and the react-router `basename`) to the GitHub Pages
+  project subpath; omit it (or leave it as `/`) for a root deploy.
+
+What doesn't work in static mode: comment submission (the form shows a Persian
+"disabled in the demo" error instead of posting) and the RSS link in the footer
+(hidden — RSS is served by Django). Search, category/tag filters, and pagination all
+still work — they just run against the snapshot in the browser instead of the API.
+
+To refresh the snapshot after seeding new demo data, run the Django backend locally
+and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
+`/api/categories/` and `/api/tags/` into `public/data/`.
+
 ## Project layout
 
 - `src/lib/api.ts` — single module for all backend calls (typed fetch wrappers); adjust
