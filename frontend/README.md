@@ -9,7 +9,17 @@ Django REST API defined in `../backend`.
 - Tailwind CSS v4 (via `@tailwindcss/vite`)
 - react-router-dom (client-side routing)
 - react-helmet-async (per-page SEO tags)
+- Tiptap v3 (`@tiptap/react`, `@tiptap/starter-kit`, image + placeholder extensions) — the
+  rich-text editor in the author panel; lazy-loaded so it never reaches public pages
 - `@fontsource/vazirmatn` — Vazirmatn is self-hosted via npm, not loaded from a CDN
+
+## Author panel
+
+`/admin` (guarded by `RequireStaff`) is a full authoring UI: dashboard, post management,
+a rich-text editor with SEO tooling, comment moderation and taxonomy management. Sign in
+at `/login` with a Django staff account — `seed_blog` provisions `demo_author` / `demo12345`.
+The token lives in `localStorage` (`src/lib/authToken.ts`) and the session is exposed through
+`useAuth()` (`src/lib/auth.tsx`).
 
 ## Setup
 
@@ -47,8 +57,9 @@ VITE_STATIC_DATA=true VITE_BASE=/blogroadeep/ npm run build
   project subpath; omit it (or leave it as `/`) for a root deploy.
 
 What doesn't work in static mode: comment submission (the form shows a Persian
-"disabled in the demo" error instead of posting) and the RSS link in the footer
-(hidden — RSS is served by Django). Search, category/tag filters, and pagination all
+"disabled in the demo" error instead of posting), the RSS link in the footer
+(hidden — RSS is served by Django), and the whole `/admin` author panel plus `/login`
+(both render a Persian "needs the Django backend" notice). Search, category/tag filters, and pagination all
 still work — they just run against the snapshot in the browser instead of the API.
 
 To refresh the snapshot after seeding new demo data, run the Django backend locally
@@ -61,14 +72,20 @@ and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
   here first if backend field/route names drift from the current contract.
 - `src/lib/types.ts` — TypeScript types for API entities.
 - `src/lib/format.ts` — fa-IR date and reading-time formatting helpers.
+- `src/lib/authToken.ts` / `src/lib/auth.tsx` — panel token storage and `AuthProvider`/`useAuth`.
+- `src/lib/seoChecks.ts` — pure content analysis + SEO checklist used by the editor.
 - `src/components/layout` — header, footer, page shell, dark-mode toggle.
 - `src/components/cards` — post card, cover image (with placeholder fallback), tags,
   share links, comment list/form.
 - `src/components/common` — loading skeletons, error state, pagination.
 - `src/components/seo/Seo.tsx` — reusable `<Seo>` head component (title, meta
   description, canonical, Open Graph, Twitter card, optional JSON-LD).
+- `src/components/admin` — panel chrome (`AdminLayout`, `RequireStaff`, toasts) and
+  editor pieces (`RichTextEditor`, `SeoPanel`, `SlugField`, `TagMultiSelect`,
+  `CoverImageField`, shared `panelStyles`).
 - `src/pages` — route-level components (`/`, `/articles`, `/articles/:slug`,
-  `/categories`, 404).
+  `/categories`, `/login`, 404).
+- `src/pages/admin` — panel screens (dashboard, post list, post editor, comments, taxonomy).
 
 ## Routing
 
@@ -78,7 +95,16 @@ and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
 | `/articles`         | Search, category filter, pagination (URL-synced) |
 | `/articles/:slug`   | Full article, comments, related posts, share links |
 | `/categories`       | Category index                                |
+| `/login`            | Panel sign-in (staff only)                    |
+| `/admin`            | Panel dashboard — stats, recent posts, pending comments |
+| `/admin/posts`      | Post management (search, status/category filter, publish, delete) |
+| `/admin/posts/new`  | Rich-text editor + SEO panel for a new post   |
+| `/admin/posts/:id/edit` | Same editor for an existing post          |
+| `/admin/comments`   | Comment moderation (approve/unapprove/delete, bulk approve) |
+| `/admin/taxonomy`   | Category and tag management                   |
 | `*`                 | 404 page                                      |
+
+Everything under `/admin` is wrapped in `RequireStaff`, lazy-loaded, and marked `noindex`.
 
 ## SEO notes
 

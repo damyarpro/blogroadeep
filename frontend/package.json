@@ -12,6 +12,11 @@
   "dependencies": {
     "@fontsource/vazirmatn": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@tiptap/extension-image": "^3.30.5",
+    "@tiptap/extension-placeholder": "^3.30.5",
+    "@tiptap/pm": "^3.30.5",
+    "@tiptap/react": "^3.30.5",
+    "@tiptap/starter-kit": "^3.30.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-helmet-async": "^3.0.0",

@@ -6,6 +6,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
+from .sanitize import sanitize_html
+
 WORDS_PER_MINUTE = 200
 
 
@@ -132,6 +134,8 @@ class Post(models.Model):
             self.slug = slugify(self.title, allow_unicode=True)
         if self.status == self.Status.PUBLISHED and self.published_at is None:
             self.published_at = timezone.now()
+        # Content is authored HTML rendered verbatim by the SPA — never trust it.
+        self.content = sanitize_html(self.content)
         self.reading_time = estimate_reading_time(self.content)
         super().save(*args, **kwargs)
 
