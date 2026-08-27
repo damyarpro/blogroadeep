@@ -19,3 +19,12 @@ There is no build system, test framework, linter, or CI configuration yet.
 4. **Branching**: Never commit directly to `main`; develop on a feature branch and open a pull request.
 5. **License**: The project is MIT-licensed; keep the existing LICENSE file intact.
 6. **Scope**: Make only the changes the user asked for; ask before destructive or hard-to-reverse actions (deleting files, force-pushing, rewriting history).
+
+## Model Roles (نقش مدل‌ها)
+
+When orchestrating multi-agent work (subagents, workflows), assign models by this hierarchy:
+
+- **Fable** — orchestrator and planner: overall planning, task decomposition, analysis, code review, and testing/verification of the other agents' output.
+- **Opus** — first (primary) implementation agent: the main complex implementation tasks.
+- **Sonnet** — second implementation agent: standard implementation tasks and parallel workstreams.
+- **Smaller models (e.g., Haiku)** — routine/mechanical tasks: simple searches, bulk edits, formatting, and other low-complexity work.
