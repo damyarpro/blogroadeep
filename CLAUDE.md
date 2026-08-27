@@ -63,6 +63,14 @@ npm run lint              # oxlint
 - RTL/Persian: `<html lang="fa" dir="rtl">`, self-hosted Vazirmatn via @fontsource (never hotlink fonts), dates formatted with `Intl.DateTimeFormat('fa-IR')` helpers in `src/lib/format.ts`. Dark mode via `data-theme` + localStorage (inline script in `index.html` prevents theme flash).
 - **Static demo mode** (no backend), deployed to GitHub Pages at https://damyarpro.github.io/blogroadeep/ by `.github/workflows/deploy-pages.yml` on push to `main`: build with `VITE_STATIC_DATA=true VITE_BASE=/blogroadeep/ npm run build`. `src/lib/api.ts` then serves `public/data/{posts,categories,tags}.json` (a snapshot of the live API — full post details, not just summaries) instead of fetching Django, doing search/filter/pagination client-side; comment submission is rejected with a Persian "disabled in the demo" error. `vite.config.ts` reads `base` from `VITE_BASE` (default `/`) and copies `dist/index.html` to `dist/404.html` for SPA routing on Pages; `main.tsx` passes the matching `basename` to `BrowserRouter`. See `frontend/README.md` for details on regenerating the snapshot.
 
+## Installed Skills
+
+`.claude/skills/` holds third-party skills vendored from public repos, available in any session working on this repo: `emil-design-eng`, `animate`, `improve-animations`, `review-animations` and siblings ([emilkowalski/skills](https://github.com/emilkowalski/skills)); `gsap-core`, `gsap-scrolltrigger`, `gsap-react` and siblings ([greensock/gsap-skills](https://github.com/greensock/gsap-skills)); `ui-ux-pro-max`, `ui-styling`, `design-system` and siblings ([nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)); `ponytail` and siblings ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)). Reach for them when polishing UI, motion, or design decisions. They are vendored copies — to update, re-clone upstream rather than editing in place.
+
+## Deployment
+
+GitHub Pages serves the static demo from the `gh-pages` branch, which `.github/workflows/deploy-pages.yml` force-pushes on every push to `main`. Pages must be pointed at that branch once in **Settings → Pages → Deploy from a branch → `gh-pages` / (root)**; the Actions token cannot enable Pages itself (`Resource not accessible by integration`). The Django backend is not deployed anywhere yet.
+
 ## Agent Rules (قوانین ایجنت)
 
 1. **Language / زبان**: Always communicate with the user in Persian (Farsi). All chat responses, explanations, and questions to the user must be in Persian. Code, identifiers, and commit messages stay in English. User-facing site text is Persian.
