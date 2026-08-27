@@ -1,14 +1,26 @@
 // Single module responsible for talking to the Django REST backend.
 // If backend field/route names shift slightly, adjust only here.
+import { readToken } from './authToken';
 import type {
+  AdminComment,
+  AdminPost,
+  AdminPostPayload,
+  AdminPostSummary,
+  AdminPostsQuery,
+  AdminStats,
+  AdminTag,
   Category,
   Comment,
   CommentPayload,
+  LoginResponse,
   Paginated,
+  PanelUser,
   PostDetail,
   PostSummary,
   PostsQuery,
+  SlugAvailability,
   Tag,
+  UploadResult,
 } from './types';
 
 export const API_BASE_URL: string =
@@ -26,36 +38,66 @@ const STATIC_PAGE_SIZE = 9;
 export class ApiError extends Error {
   status: number;
 
-  constructor(message: string, status: number) {
+  /** DRF field errors, e.g. `{ slug: ['نوشته‌ای با این نامک وجود دارد.'] }`. */
+  fields?: Record<string, string[]>;
+
+  constructor(message: string, status: number, fields?: Record<string, string[]>) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.fields = fields;
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+/** Turn a DRF error body into a readable message plus per-field errors. */
+function parseErrorBody(body: unknown): { message: string; fields?: Record<string, string[]> } {
+  if (!body || typeof body !== 'object') return { message: '' };
+  const record = body as Record<string, unknown>;
+  if (typeof record.detail === 'string') return { message: record.detail };
+
+  const fields: Record<string, string[]> = {};
+  const messages: string[] = [];
+  for (const [key, value] of Object.entries(record)) {
+    const list = Array.isArray(value) ? value.map(String) : [String(value)];
+    fields[key] = list;
+    messages.push(list.join(' '));
+  }
+  return { message: messages.join(' ').trim(), fields: Object.keys(fields).length ? fields : undefined };
+}
+
+interface RequestOptions extends Omit<RequestInit, 'headers'> {
+  headers?: Record<string, string>;
+  /** Attach the panel's `Authorization: Token …` header. */
+  auth?: boolean;
+}
+
+async function request<T>(path: string, init: RequestOptions = {}): Promise<T> {
+  const { headers, auth, ...rest } = init;
   const url = `${API_BASE_URL}${path}`;
+  const finalHeaders: Record<string, string> = { Accept: 'application/json', ...(headers ?? {}) };
+  if (auth) {
+    const token = readToken();
+    if (token) finalHeaders.Authorization = `Token ${token}`;
+  }
+
   let response: Response;
   try {
-    response = await fetch(url, {
-      headers: { Accept: 'application/json', ...(init?.headers ?? {}) },
-      ...init,
-    });
+    response = await fetch(url, { headers: finalHeaders, ...rest });
   } catch {
     throw new ApiError('اتصال به سرور برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کنید.', 0);
   }
 
   if (!response.ok) {
-    let detail = '';
+    let parsed: { message: string; fields?: Record<string, string[]> } = { message: '' };
     try {
-      const body = await response.json();
-      detail = typeof body?.detail === 'string' ? body.detail : '';
+      parsed = parseErrorBody(await response.json());
     } catch {
       // response had no JSON body — ignore
     }
     throw new ApiError(
-      detail || `خطای سرور (کد ${response.status})`,
+      parsed.message || `خطای سرور (کد ${response.status})`,
       response.status,
+      parsed.fields,
     );
   }
 
@@ -66,7 +108,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-function buildQuery(params: Record<string, string | number | undefined>): string {
+function jsonRequest<T>(path: string, method: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method,
+    auth: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+function buildQuery(
+  params: Record<string, string | number | boolean | undefined | null>,
+): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '' && value !== null) {
@@ -202,4 +255,216 @@ export function submitComment(slug: string, payload: CommentPayload): Promise<Co
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+// ---------------------------------------------------------------------------
+// Authoring panel API (token auth, staff only). Every call here needs the real
+// Django backend — the static demo build has no server to write to.
+// ---------------------------------------------------------------------------
+
+const STATIC_PANEL_MESSAGE =
+  'در نسخهٔ نمایشی، پنل نویسنده در دسترس نیست؛ برای نوشتن و انتشار به بک‌اند جنگو نیاز است.';
+
+function rejectInStaticMode<T>(): Promise<T> {
+  return Promise.reject(new ApiError(STATIC_PANEL_MESSAGE, 503));
+}
+
+export function login(username: string, password: string): Promise<LoginResponse> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<LoginResponse>('/auth/login/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export function logout(): Promise<void> {
+  if (isStaticMode) return Promise.resolve();
+  return request<void>('/auth/logout/', { method: 'POST', auth: true });
+}
+
+export function fetchMe(): Promise<PanelUser> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<PanelUser>('/auth/me/', { auth: true });
+}
+
+export function fetchAdminStats(): Promise<AdminStats> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<AdminStats>('/admin/stats/', { auth: true });
+}
+
+export function fetchAdminPosts(
+  query: AdminPostsQuery = {},
+): Promise<Paginated<AdminPostSummary>> {
+  if (isStaticMode) return rejectInStaticMode();
+  const qs = buildQuery({
+    page: query.page,
+    search: query.search,
+    status: query.status,
+    category: query.category,
+    ordering: query.ordering,
+  });
+  return request<Paginated<AdminPostSummary>>(`/admin/posts/${qs}`, { auth: true });
+}
+
+export function fetchAdminPost(id: number): Promise<AdminPost> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<AdminPost>(`/admin/posts/${id}/`, { auth: true });
+}
+
+/**
+ * Posts go out as JSON unless a fresh cover image file is attached, in which case
+ * the whole payload has to travel as multipart/form-data.
+ */
+function postRequestInit(payload: AdminPostPayload, method: string): RequestOptions {
+  const { cover_image: coverImage, ...rest } = payload;
+
+  if (!(coverImage instanceof File)) {
+    const body: Record<string, unknown> = { ...rest };
+    return {
+      method,
+      auth: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    };
+  }
+
+  const form = new FormData();
+  for (const [key, value] of Object.entries(rest)) {
+    if (value === undefined) continue;
+    if (key === 'tags' && Array.isArray(value)) {
+      for (const tag of value) form.append('tags', String(tag));
+    } else if (value === null) {
+      form.append(key, '');
+    } else {
+      form.append(key, String(value));
+    }
+  }
+  form.append('cover_image', coverImage);
+  return { method, auth: true, body: form };
+}
+
+export function createAdminPost(payload: AdminPostPayload): Promise<AdminPost> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<AdminPost>('/admin/posts/', postRequestInit(payload, 'POST'));
+}
+
+export function updateAdminPost(
+  id: number,
+  payload: AdminPostPayload,
+): Promise<AdminPost> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<AdminPost>(`/admin/posts/${id}/`, postRequestInit(payload, 'PATCH'));
+}
+
+export function patchAdminPost(
+  id: number,
+  patch: Partial<AdminPostPayload>,
+): Promise<AdminPost> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest<AdminPost>(`/admin/posts/${id}/`, 'PATCH', patch);
+}
+
+export function deleteAdminPost(id: number): Promise<void> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<void>(`/admin/posts/${id}/`, { method: 'DELETE', auth: true });
+}
+
+export function checkSlugAvailability(
+  slug: string,
+  excludeId?: number,
+): Promise<SlugAvailability> {
+  if (isStaticMode) return rejectInStaticMode();
+  const qs = buildQuery({ slug, exclude: excludeId });
+  return request<SlugAvailability>(`/admin/posts/slug-available/${qs}`, { auth: true });
+}
+
+export function fetchAdminCategories(): Promise<Category[]> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<Category[]>('/admin/categories/', { auth: true });
+}
+
+export function createAdminCategory(payload: {
+  name: string;
+  slug?: string;
+  description?: string;
+}): Promise<Category> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest<Category>('/admin/categories/', 'POST', payload);
+}
+
+export function updateAdminCategory(
+  id: number,
+  payload: { name?: string; slug?: string; description?: string },
+): Promise<Category> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest<Category>(`/admin/categories/${id}/`, 'PATCH', payload);
+}
+
+export function deleteAdminCategory(id: number): Promise<void> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<void>(`/admin/categories/${id}/`, { method: 'DELETE', auth: true });
+}
+
+export function fetchAdminTags(): Promise<Tag[]> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<Tag[]>('/admin/tags/', { auth: true });
+}
+
+export function createAdminTag(payload: { name: string; slug?: string }): Promise<AdminTag> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest<AdminTag>('/admin/tags/', 'POST', payload);
+}
+
+export function updateAdminTag(
+  id: number,
+  payload: { name?: string; slug?: string },
+): Promise<Tag> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest<Tag>(`/admin/tags/${id}/`, 'PATCH', payload);
+}
+
+export function deleteAdminTag(id: number): Promise<void> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<void>(`/admin/tags/${id}/`, { method: 'DELETE', auth: true });
+}
+
+export function fetchAdminComments(query: {
+  page?: number;
+  is_approved?: boolean;
+  search?: string;
+} = {}): Promise<Paginated<AdminComment>> {
+  if (isStaticMode) return rejectInStaticMode();
+  const qs = buildQuery({
+    page: query.page,
+    is_approved: query.is_approved,
+    search: query.search,
+  });
+  return request<Paginated<AdminComment>>(`/admin/comments/${qs}`, { auth: true });
+}
+
+export function setCommentApproval(id: number, approved: boolean): Promise<AdminComment> {
+  if (isStaticMode) return rejectInStaticMode();
+  const path = `/admin/comments/${id}/${approved ? 'approve' : 'unapprove'}/`;
+  return request<AdminComment>(path, { method: 'POST', auth: true });
+}
+
+export function bulkApproveComments(
+  ids: number[],
+  approved = true,
+): Promise<{ updated: number; is_approved: boolean }> {
+  if (isStaticMode) return rejectInStaticMode();
+  return jsonRequest('/admin/comments/bulk-approve/', 'POST', { ids, is_approved: approved });
+}
+
+export function deleteAdminComment(id: number): Promise<void> {
+  if (isStaticMode) return rejectInStaticMode();
+  return request<void>(`/admin/comments/${id}/`, { method: 'DELETE', auth: true });
+}
+
+export function uploadImage(file: File): Promise<UploadResult> {
+  if (isStaticMode) return rejectInStaticMode();
+  const form = new FormData();
+  form.append('file', file);
+  return request<UploadResult>('/admin/uploads/', { method: 'POST', auth: true, body: form });
 }

@@ -49,11 +49,16 @@ class AdminCategorySerializer(serializers.ModelSerializer):
             )
         ],
     )
-    post_count = serializers.IntegerField(read_only=True)
+    post_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
         fields = ["id", "name", "slug", "description", "post_count"]
+
+    def get_post_count(self, obj):
+        # The list view annotates this; a freshly created object has to count.
+        annotated = getattr(obj, "post_count", None)
+        return obj.posts.count() if annotated is None else annotated
 
     def validate(self, attrs):
         if not attrs.get("slug"):
@@ -80,11 +85,15 @@ class AdminTagSerializer(serializers.ModelSerializer):
             )
         ],
     )
-    post_count = serializers.IntegerField(read_only=True)
+    post_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Tag
         fields = ["id", "name", "slug", "post_count"]
+
+    def get_post_count(self, obj):
+        annotated = getattr(obj, "post_count", None)
+        return obj.posts.count() if annotated is None else annotated
 
     def validate(self, attrs):
         if not attrs.get("slug"):

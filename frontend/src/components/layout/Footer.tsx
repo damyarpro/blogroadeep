@@ -1,12 +1,21 @@
+import { Link } from 'react-router-dom';
 import { isStaticMode } from '../../lib/api';
+import { useAuth } from '../../lib/auth';
 
 const year = new Date().getFullYear();
 
 export function Footer() {
+  const { isStaff } = useAuth();
+
   return (
     <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:justify-between sm:px-6 dark:text-slate-400">
         <p>© {year} بلاگ رودیپ. تمامی حقوق محفوظ است.</p>
+        {isStaff && (
+          <Link to="/admin" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+            پنل نویسنده
+          </Link>
+        )}
         {/* RSS is served by the Django backend and doesn't exist in the static demo. */}
         {!isStaticMode && (
           <a

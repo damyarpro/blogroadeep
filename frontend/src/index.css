@@ -20,13 +20,162 @@ body {
   line-height: 1.9;
 }
 
-/* Reasonable line-length + spacing defaults for long-form Persian text */
+/* Reasonable line-length + spacing defaults for long-form Persian text.
+   Shared by the public article page and the panel's rich text editor, so what an
+   author sees while writing matches what readers get. */
 .prose-fa {
   line-height: 2.1;
 }
 
 .prose-fa p {
   margin-bottom: 1.25em;
+}
+
+.prose-fa h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  line-height: 1.6;
+  margin: 1.6em 0 0.6em;
+  color: var(--color-slate-900);
+}
+
+.prose-fa h3 {
+  font-size: 1.25em;
+  font-weight: 700;
+  line-height: 1.7;
+  margin: 1.4em 0 0.5em;
+  color: var(--color-slate-900);
+}
+
+.prose-fa h4 {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin: 1.2em 0 0.4em;
+  color: var(--color-slate-900);
+}
+
+[data-theme='dark'] .prose-fa :is(h2, h3, h4) {
+  color: var(--color-white);
+}
+
+.prose-fa ul,
+.prose-fa ol {
+  margin: 0 0 1.25em;
+  padding-inline-start: 1.6em;
+}
+
+.prose-fa ul {
+  list-style: disc;
+}
+
+.prose-fa ol {
+  list-style: decimal;
+}
+
+.prose-fa li {
+  margin-bottom: 0.4em;
+}
+
+.prose-fa blockquote {
+  margin: 1.5em 0;
+  padding: 0.2em 1.1em;
+  border-inline-start: 3px solid var(--color-indigo-500);
+  color: var(--color-slate-500);
+  font-style: normal;
+}
+
+[data-theme='dark'] .prose-fa blockquote {
+  color: var(--color-slate-400);
+}
+
+.prose-fa a {
+  color: var(--color-indigo-600);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-theme='dark'] .prose-fa a {
+  color: var(--color-indigo-400);
+}
+
+.prose-fa img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5em auto;
+}
+
+.prose-fa code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background-color: var(--color-slate-100);
+  border-radius: 0.35rem;
+  padding: 0.15em 0.4em;
+  direction: ltr;
+  display: inline-block;
+}
+
+.prose-fa pre {
+  direction: ltr;
+  text-align: start;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  padding: 1em 1.2em;
+  border-radius: 0.75rem;
+  background-color: var(--color-slate-900);
+  color: var(--color-slate-100);
+  line-height: 1.8;
+}
+
+.prose-fa pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  display: inline;
+}
+
+[data-theme='dark'] .prose-fa code {
+  background-color: var(--color-slate-800);
+}
+
+.prose-fa hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid var(--color-slate-200);
+}
+
+[data-theme='dark'] .prose-fa hr {
+  border-color: var(--color-slate-800);
+}
+
+.prose-fa table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.prose-fa :is(th, td) {
+  border: 1px solid var(--color-slate-200);
+  padding: 0.5em 0.75em;
+  text-align: start;
+}
+
+[data-theme='dark'] .prose-fa :is(th, td) {
+  border-color: var(--color-slate-800);
+}
+
+/* Tiptap placeholder for an empty editor (extension-placeholder). */
+.prose-fa p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-slate-400);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror:focus {
+  outline: none;
 }
 
 ::selection {
