@@ -13,6 +13,12 @@ export interface Tag {
   post_count: number;
 }
 
+export interface Author {
+  id: number;
+  username: string;
+  full_name: string;
+}
+
 export interface PostSummary {
   id: number;
   title: string;
@@ -21,7 +27,7 @@ export interface PostSummary {
   cover_image: string | null;
   category: Category | null;
   tags: Tag[];
-  author_name: string;
+  author: Author;
   published_at: string;
   reading_time: number | null;
 }
@@ -34,6 +40,8 @@ export interface Comment {
 
 export interface PostDetail extends PostSummary {
   content: string;
+  created_at: string;
+  updated_at: string;
   meta_title: string | null;
   meta_description: string | null;
   meta_keywords: string | null;

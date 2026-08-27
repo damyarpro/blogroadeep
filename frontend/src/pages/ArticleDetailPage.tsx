@@ -94,10 +94,10 @@ export function ArticleDetailPage() {
     headline: post.title,
     description: post.meta_description || post.excerpt,
     datePublished: post.published_at,
-    dateModified: post.published_at,
+    dateModified: post.updated_at,
     author: {
       '@type': 'Person',
-      name: post.author_name,
+      name: post.author.full_name,
     },
     publisher: {
       '@type': 'Organization',
@@ -144,7 +144,7 @@ export function ArticleDetailPage() {
       </h1>
 
       <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
-        <span>{post.author_name}</span>
+        <span>{post.author.full_name}</span>
         <span aria-hidden="true">·</span>
         <time dateTime={post.published_at}>{formatJalaliDate(post.published_at)}</time>
         {readingTime && (
