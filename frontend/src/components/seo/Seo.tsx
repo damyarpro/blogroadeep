@@ -5,6 +5,14 @@ const DEFAULT_DESCRIPTION =
   'بلاگ رودیپ؛ مقالات، یادداشت‌ها و تحلیل‌های تازه به زبان فارسی.';
 const SITE_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
+// Joins the Vite base path (e.g. "/" or "/blogroadeep/") with an app-relative path
+// (e.g. "/" or "/articles/some-slug") without producing a doubled slash.
+function withBase(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // "" or "/blogroadeep"
+  if (path === '/') return `${base}/`;
+  return `${base}${path}`;
+}
+
 export interface SeoProps {
   title: string;
   description?: string;
@@ -28,7 +36,7 @@ export function Seo({
 }: SeoProps) {
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const canonicalUrl = canonicalPath
-    ? `${SITE_URL}${canonicalPath}`
+    ? `${SITE_URL}${withBase(canonicalPath)}`
     : typeof window !== 'undefined'
       ? window.location.href
       : undefined;

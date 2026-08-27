@@ -50,6 +50,7 @@ npm run lint              # oxlint
 - Routes: `/`, `/articles` (search/filter/pagination state lives in URL query params), `/articles/:slug`, `/categories`, `*`.
 - `src/components/seo/Seo.tsx` (react-helmet-async) owns all meta/OG/canonical/JSON-LD tags; article detail emits `BlogPosting` JSON-LD using API SEO fields with fallbacks. Keep one `h1` per page and semantic elements — SEO is a project requirement, not a nice-to-have.
 - RTL/Persian: `<html lang="fa" dir="rtl">`, self-hosted Vazirmatn via @fontsource (never hotlink fonts), dates formatted with `Intl.DateTimeFormat('fa-IR')` helpers in `src/lib/format.ts`. Dark mode via `data-theme` + localStorage (inline script in `index.html` prevents theme flash).
+- **Static demo mode** (no backend), deployed to GitHub Pages at https://damyarpro.github.io/blogroadeep/ by `.github/workflows/deploy-pages.yml` on push to `main`: build with `VITE_STATIC_DATA=true VITE_BASE=/blogroadeep/ npm run build`. `src/lib/api.ts` then serves `public/data/{posts,categories,tags}.json` (a snapshot of the live API — full post details, not just summaries) instead of fetching Django, doing search/filter/pagination client-side; comment submission is rejected with a Persian "disabled in the demo" error. `vite.config.ts` reads `base` from `VITE_BASE` (default `/`) and copies `dist/index.html` to `dist/404.html` for SPA routing on Pages; `main.tsx` passes the matching `basename` to `BrowserRouter`. See `frontend/README.md` for details on regenerating the snapshot.
 
 ## Agent Rules (قوانین ایجنت)
 

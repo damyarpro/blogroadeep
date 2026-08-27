@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "جنگو",
+    "slug": "django",
+    "post_count": 3
+  },
+  {
+    "id": 7,
+    "name": "عملکرد",
+    "slug": "performance",
+    "post_count": 1
+  },
+  {
+    "id": 2,
+    "name": "پایتون",
+    "slug": "python",
+    "post_count": 2
+  },
+  {
+    "id": 3,
+    "name": "ری‌اکت",
+    "slug": "react",
+    "post_count": 1
+  },
+  {
+    "id": 6,
+    "name": "راست‌به‌چپ",
+    "slug": "rtl",
+    "post_count": 1
+  },
+  {
+    "id": 5,
+    "name": "سئو",
+    "slug": "seo-tag",
+    "post_count": 1
+  },
+  {
+    "id": 4,
+    "name": "وب",
+    "slug": "web",
+    "post_count": 5
+  }
+]
