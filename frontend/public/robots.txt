@@ -1,0 +1,5 @@
+# Development/SPA-build placeholder.
+# In production this file (and /sitemap.xml) is served by the Django backend,
+# which owns crawl rules and the sitemap for the deployed domain.
+User-agent: *
+Allow: /

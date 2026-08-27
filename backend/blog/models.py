@@ -3,7 +3,6 @@ import re
 
 from django.conf import settings
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -34,7 +33,8 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("blog:category-detail", kwargs={"slug": self.slug})
+        # Canonical public URL lives on the SPA frontend.
+        return f"/category/{self.slug}/"
 
 
 class Tag(models.Model):
@@ -65,9 +65,11 @@ class PostQuerySet(models.QuerySet):
         return self.select_related("author", "category").prefetch_related("tags")
 
 
-class PublishedManager(models.Manager):
+class PublishedManager(models.Manager.from_queryset(PostQuerySet)):
+    """Manager exposing only posts visible to the public."""
+
     def get_queryset(self):
-        return PostQuerySet(self.model, using=self._db).published()
+        return super().get_queryset().published()
 
 
 class Post(models.Model):
@@ -134,7 +136,8 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("blog:post-detail", kwargs={"slug": self.slug})
+        # Canonical public URL lives on the SPA frontend.
+        return f"/posts/{self.slug}/"
 
     @property
     def is_published(self):
