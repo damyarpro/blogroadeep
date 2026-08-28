@@ -47,6 +47,132 @@
   --color-forest-950: #082418;
 }
 
+/* ---------------------------------------------------------------------------
+   Magazine home page primitives: a glass overlay panel, a headline ticker, a
+   snap scroller and the hero wash. Everything degrades to a solid, static
+   equivalent under prefers-reduced-transparency / prefers-reduced-motion.
+   --------------------------------------------------------------------------- */
+
+/* Translucent panel that sits over a photograph. 0.82 alpha keeps ink-950 body
+   text above 9:1 even when the photo underneath is pure black. */
+.glass {
+  background-color: rgb(251 251 249 / 0.82);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+[data-theme='dark'] .glass {
+  background-color: rgb(12 13 13 / 0.82);
+}
+
+/* No blur support, or a reader who asked for less transparency: go solid. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background-color: var(--color-bone-50);
+  }
+
+  [data-theme='dark'] .glass {
+    background-color: var(--color-ink-950);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background-color: var(--color-bone-50);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-theme='dark'] .glass {
+    background-color: var(--color-ink-950);
+  }
+}
+
+/* Soft colour wash behind the display headline, in the one accent family. */
+.hero-wash {
+  background-image:
+    radial-gradient(58% 110% at 16% -4%, rgb(140 233 154 / 0.42), transparent 64%),
+    radial-gradient(54% 105% at 84% 0%, rgb(184 245 196 / 0.52), transparent 66%),
+    radial-gradient(80% 84% at 50% -16%, rgb(255 255 255 / 0.9), transparent 74%);
+}
+
+[data-theme='dark'] .hero-wash {
+  background-image:
+    radial-gradient(58% 100% at 18% 0%, rgb(28 107 69 / 0.4), transparent 62%),
+    radial-gradient(52% 96% at 82% 4%, rgb(14 58 36 / 0.55), transparent 64%);
+}
+
+/* Breaking-headline ticker: the track holds the list twice, so translating it
+   by half its width loops seamlessly. Positive X moves right, which is the
+   right-to-left reading direction's equivalent of a left-running marquee. */
+@keyframes ticker-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker-rtl var(--ticker-duration, 36s) linear infinite;
+  will-change: transform;
+}
+
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+/* Horizontal snap scroller with faded edges and no visible scrollbar. */
+.snap-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  --snap-fade: 1.75rem;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--snap-fade),
+    #000 calc(100% - var(--snap-fade)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--snap-fade),
+    #000 calc(100% - var(--snap-fade)),
+    transparent
+  );
+}
+
+@media (min-width: 40rem) {
+  .snap-row {
+    --snap-fade: 4rem;
+  }
+}
+
+.snap-row::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-row > * {
+  scroll-snap-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No looping marquee: show the selected headline on its own, standing still. */
+  .ticker-track {
+    animation: none;
+    transform: none;
+  }
+
+  .ticker-copy + .ticker-copy,
+  .ticker-item + .ticker-item {
+    display: none;
+  }
+}
+
 /* Radius system for the public site:
      full-width section boards (hero, article band, related) = rounded-[2rem]
      cards, panels, tiles, image frames                      = rounded-3xl

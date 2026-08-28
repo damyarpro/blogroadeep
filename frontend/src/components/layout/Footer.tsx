@@ -10,14 +10,14 @@ export function Footer() {
   return (
     <footer className="mt-auto bg-ink-950 dark:border-t dark:border-ink-800 dark:bg-ink-900">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 px-4 py-12 text-sm text-bone-300 sm:flex-row sm:justify-between sm:px-6">
-        <p className="flex items-center gap-2.5 text-center sm:text-start">
-          <span
-            aria-hidden="true"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint-300 text-sm font-black text-ink-950"
-          >
-            ر
+        <p className="flex flex-wrap items-baseline justify-center gap-x-2.5 text-center sm:justify-start sm:text-start">
+          <span className="text-lg font-black tracking-tight text-mint-300">
+            بلاگ رودیپ
+            <span aria-hidden="true" className="text-mint-400">
+              .
+            </span>
           </span>
-          © {year} بلاگ رودیپ. تمامی حقوق محفوظ است.
+          <span>© {year} تمامی حقوق محفوظ است.</span>
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">

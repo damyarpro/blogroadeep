@@ -77,6 +77,9 @@ and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
 - `src/components/layout` — header, footer, page shell, dark-mode toggle.
 - `src/components/cards` — post card, cover image (with placeholder fallback), tags,
   share links, comment list/form.
+- `src/components/home` — magazine home-page parts: breaking-headline ticker,
+  bookmark toggle, shared line icons.
+- `src/lib/bookmarks.ts` — the reader's local reading list (`localStorage`, no server).
 - `src/components/common` — loading skeletons, error state, pagination.
 - `src/components/seo/Seo.tsx` — reusable `<Seo>` head component (title, meta
   description, canonical, Open Graph, Twitter card, optional JSON-LD).
@@ -91,7 +94,7 @@ and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
 
 | Path               | Page                                          |
 | ------------------ | ---------------------------------------------- |
-| `/`                 | Home — hero + latest posts                    |
+| `/`                 | Magazine home: ticker, featured trio, bento, wide reads |
 | `/articles`         | Search, category filter, pagination (URL-synced) |
 | `/articles/:slug`   | Full article, comments, related posts, share links |
 | `/categories`       | Category index                                |
@@ -105,6 +108,20 @@ and re-fetch `/api/posts/` (and each post's `/api/posts/<slug>/` detail) plus
 | `*`                 | 404 page                                      |
 
 Everything under `/admin` is wrapped in `RequireStaff`, lazy-loaded, and marked `noindex`.
+
+## Demo photography
+
+The home page is photo-led. `CoverImage` resolves a post's artwork in three steps:
+
+1. the post's uploaded `cover_image`, when it has one;
+2. otherwise a deterministic placeholder from `https://picsum.photos/seed/<slug>/<w>/<h>`,
+   which is only requested when a caller passes the `photo` prop (the home page does;
+   the article page and the post grid do not, so their behaviour is unchanged);
+3. and, if that image fails to load too, the offline-safe generative `CoverArt` SVG.
+
+**The picsum photographs are demo placeholders, not editorial images.** Upload a real
+cover on each post in the authoring panel and step 1 takes over automatically, with no
+code change.
 
 ## SEO notes
 
