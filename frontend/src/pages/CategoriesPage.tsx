@@ -5,6 +5,7 @@ import type { Category } from '../lib/types';
 import { ErrorState } from '../components/common/ErrorState';
 import { Seo } from '../components/seo/Seo';
 import { toPersianDigits } from '../lib/format';
+import { CoverArt } from '../components/cards/CoverArt';
 
 /* Radius system: block surfaces = rounded-3xl, anything pressable = rounded-full. */
 
@@ -56,10 +57,10 @@ function CategoryTile({ category, index }: { category: Category; index: number }
     >
       <Link
         to={`/articles?category=${category.slug}`}
-        className={`lift press group flex h-full flex-col gap-4 rounded-3xl p-7 sm:p-9 ${tileShell[tone]}`}
+        className={`lift press group flex h-full flex-col gap-5 rounded-3xl p-8 sm:p-10 ${tileShell[tone]}`}
       >
         <span className="flex items-start justify-between gap-4">
-          <span className={`text-2xl leading-snug font-black tracking-tight ${tileTitle[tone]}`}>{category.name}</span>
+          <span className={`text-3xl leading-snug font-black tracking-tight ${tileTitle[tone]}`}>{category.name}</span>
           <span
             aria-hidden="true"
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150 ${tileArrow[tone]}`}
@@ -71,7 +72,13 @@ function CategoryTile({ category, index }: { category: Category; index: number }
         </span>
 
         {category.description && (
-          <span className={`max-w-md text-sm leading-7 ${tileBody[tone]}`}>{category.description}</span>
+          <span className={`max-w-md leading-7 ${tileBody[tone]}`}>{category.description}</span>
+        )}
+
+        {index === 0 && (
+          <span aria-hidden="true" className="mt-2 block rounded-3xl bg-ink-900 p-2">
+            <CoverArt seed={`category-${category.slug}`} className="block h-40 w-full rounded-2xl sm:h-48" />
+          </span>
         )}
 
         <span
@@ -129,7 +136,7 @@ export function CategoriesPage() {
       {/* Section 1 of 2: narrow intro column on bare paper. */}
       <section className="mx-auto max-w-5xl px-4 pt-16 pb-10 sm:px-6">
         <div className="max-w-xl">
-          <h1 className="rise text-4xl leading-tight font-black tracking-tight text-ink-950 sm:text-5xl dark:text-bone-50">
+          <h1 className="rise text-[2.75rem] leading-[1.1] font-black tracking-tight text-ink-950 sm:text-6xl dark:text-bone-50">
             دسته‌بندی‌ها
           </h1>
           <p
@@ -164,8 +171,8 @@ export function CategoriesPage() {
         {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
 
         {!loading && !error && categories && categories.length === 0 && (
-          <div className="rise mx-auto max-w-lg rounded-3xl bg-mint-300 px-6 py-14 text-center sm:px-10">
-            <p className="text-2xl font-black tracking-tight text-ink-950">هنوز دسته‌بندی‌ای نداریم</p>
+          <div className="rise mx-auto max-w-lg rounded-[2rem] bg-mint-300 px-6 py-16 text-center sm:px-10">
+            <p className="text-3xl font-black tracking-tight text-ink-950">هنوز دسته‌بندی‌ای نداریم</p>
             <p className="mt-3 leading-7 text-forest-900">
               به‌جای آن می‌توانید همهٔ نوشته‌ها را در فهرست مقالات ببینید.
             </p>

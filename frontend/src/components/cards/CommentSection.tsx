@@ -54,7 +54,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
   return (
     <section aria-labelledby="comments-heading" className="mt-16">
       <div className="mb-2 flex flex-wrap items-baseline gap-3">
-        <h2 id="comments-heading" className="text-2xl font-black tracking-tight text-ink-950 dark:text-bone-50">
+        <h2 id="comments-heading" className="text-3xl font-black tracking-tight text-ink-950 dark:text-bone-50">
           دیدگاه‌ها
         </h2>
         {comments.length > 0 && (
@@ -76,7 +76,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
         </p>
       )}
 
-      <div className="rounded-3xl border border-bone-300 bg-bone-50 p-6 sm:p-9 dark:border-ink-700 dark:bg-ink-900">
+      <div className="rounded-[2rem] border border-bone-300 bg-bone-50 p-7 sm:p-10 dark:border-ink-700 dark:bg-ink-900">
         <h3 className="text-xl font-black tracking-tight text-ink-950 dark:text-bone-50">ثبت دیدگاه</h3>
         <p className="mt-2 text-sm text-ink-600 dark:text-bone-300">
           نشانی ایمیل شما منتشر نمی‌شود و فقط برای پاسخ به کار می‌رود.
