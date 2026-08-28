@@ -1,13 +1,32 @@
 // Tiptap-based RTL rich text editor for the authoring panel.
 // The editing surface reuses the public article's `prose-fa` classes, so what an
 // author sees here is what readers get on /articles/:slug.
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
+import { TableKit } from '@tiptap/extension-table';
+import CharacterCount from '@tiptap/extension-character-count';
 import { ApiError, uploadImage } from '../../lib/api';
 import { toPersianDigits } from '../../lib/format';
+import { Direction, isDirectionLtrActive } from '../../lib/tiptap/direction';
+import {
+  PersianTools,
+  ZWNJ,
+  convertSelectionToPersianDigits,
+  convertSelectionToPersianLetters,
+  insertGuillemets,
+} from '../../lib/tiptap/persianTools';
+import '../../styles/editor.css';
 
 interface RichTextEditorProps {
   value: string;
@@ -18,6 +37,17 @@ interface RichTextEditorProps {
 }
 
 const EDITOR_PLACEHOLDER = 'نوشتن را از اینجا شروع کنید…';
+
+/** Block types that can carry alignment / an explicit `dir`. */
+const DIRECTION_TYPES = ['paragraph', 'heading', 'blockquote', 'listItem'];
+
+const HIGHLIGHT_COLORS: { label: string; value: string; swatch: string }[] = [
+  { label: 'زرد', value: '#fde68a', swatch: '#fde68a' },
+  { label: 'سبز', value: '#a7f3d0', swatch: '#a7f3d0' },
+  { label: 'آبی', value: '#bae6fd', swatch: '#bae6fd' },
+  { label: 'صورتی', value: '#fecdd3', swatch: '#fecdd3' },
+  { label: 'بنفش', value: '#ddd6fe', swatch: '#ddd6fe' },
+];
 
 function ToolbarButton({
   onClick,
@@ -63,6 +93,72 @@ const stroke = (path: string) => (
   </svg>
 );
 
+/** A toolbar button that opens a small popover menu, closing on outside click / Escape. */
+function ToolbarDropdown({
+  label,
+  trigger,
+  active = false,
+  children,
+}: {
+  label: string;
+  trigger: ReactNode;
+  active?: boolean;
+  children: (close: () => void) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: PointerEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <ToolbarButton label={label} active={active || open} onClick={() => setOpen((v) => !v)}>
+        {trigger}
+      </ToolbarButton>
+      {open && (
+        <div className="absolute start-0 top-full z-20 mt-1.5 min-w-[11rem] rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+          {children(() => setOpen(false))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DropdownItem({
+  onClick,
+  disabled,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-200 dark:hover:bg-slate-700"
+    >
+      {children}
+    </button>
+  );
+}
+
 function Toolbar({
   editor,
   onPickImage,
@@ -82,6 +178,9 @@ function Toolbar({
     }
     editor.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run();
   }, [editor]);
+
+  const dirActive = isDirectionLtrActive(editor, DIRECTION_TYPES);
+  const inTable = editor.isActive('table');
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-slate-100 px-2 py-1.5 dark:border-slate-700 dark:bg-slate-800/70">
@@ -131,11 +230,49 @@ function Toolbar({
         <span className="font-bold">H3</span>
       </ToolbarButton>
       <ToolbarButton
+        label="سرتیتر درجه ۴"
+        active={editor.isActive('heading', { level: 4 })}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+      >
+        <span className="font-bold">H4</span>
+      </ToolbarButton>
+      <ToolbarButton
         label="پاراگراف"
         active={editor.isActive('paragraph')}
         onClick={() => editor.chain().focus().setParagraph().run()}
       >
         <span className="font-bold">P</span>
+      </ToolbarButton>
+
+      <Divider />
+
+      <ToolbarButton
+        label="چینش راست"
+        active={editor.isActive({ textAlign: 'right' })}
+        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+      >
+        {stroke('M4 6h16M10 12h10M4 18h16')}
+      </ToolbarButton>
+      <ToolbarButton
+        label="وسط‌چین"
+        active={editor.isActive({ textAlign: 'center' })}
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+      >
+        {stroke('M4 6h16M7 12h10M6 18h12')}
+      </ToolbarButton>
+      <ToolbarButton
+        label="چینش چپ"
+        active={editor.isActive({ textAlign: 'left' })}
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+      >
+        {stroke('M4 6h16M4 12h10M4 18h16')}
+      </ToolbarButton>
+      <ToolbarButton
+        label="بلوکی (justify)"
+        active={editor.isActive({ textAlign: 'justify' })}
+        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+      >
+        {stroke('M4 6h16M4 12h16M4 18h16')}
       </ToolbarButton>
 
       <Divider />
@@ -177,6 +314,57 @@ function Toolbar({
 
       <Divider />
 
+      <ToolbarDropdown
+        label="هایلایت متن"
+        active={editor.isActive('highlight')}
+        trigger={<span className="rounded bg-amber-200 px-1 font-bold text-slate-800">H</span>}
+      >
+        {(close) => (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 px-1 py-1">
+              {HIGHLIGHT_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  title={color.label}
+                  aria-label={`هایلایت ${color.label}`}
+                  onClick={() => {
+                    editor.chain().focus().toggleHighlight({ color: color.value }).run();
+                    close();
+                  }}
+                  className={[
+                    'h-6 w-6 rounded-full border transition',
+                    editor.isActive('highlight', { color: color.value })
+                      ? 'border-indigo-600 ring-2 ring-indigo-400'
+                      : 'border-slate-300 dark:border-slate-600',
+                  ].join(' ')}
+                  style={{ backgroundColor: color.swatch }}
+                />
+              ))}
+            </div>
+            <DropdownItem
+              disabled={!editor.isActive('highlight')}
+              onClick={() => {
+                editor.chain().focus().unsetHighlight().run();
+                close();
+              }}
+            >
+              حذف هایلایت
+            </DropdownItem>
+          </div>
+        )}
+      </ToolbarDropdown>
+
+      <ToolbarButton
+        label={dirActive ? 'بازگشت به راست‌به‌چپ' : 'تبدیل بلوک به چپ‌به‌راست (برای متن انگلیسی)'}
+        active={dirActive}
+        onClick={() => editor.chain().focus().toggleDirection().run()}
+      >
+        <span className="text-[11px] font-bold tracking-tight">LTR</span>
+      </ToolbarButton>
+
+      <Divider />
+
       <ToolbarButton label="افزودن یا ویرایش پیوند" active={editor.isActive('link')} onClick={setLink}>
         {stroke('M13.5 10.5 21 3m0 0h-5.25M21 3v5.25M10.5 6H6a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h9a3 3 0 0 0 3-3v-4.5')}
       </ToolbarButton>
@@ -195,6 +383,93 @@ function Toolbar({
         {uploading
           ? stroke('M12 3a9 9 0 1 0 9 9')
           : stroke('M3 16.5 8.25 11l4.5 4.5 2.25-2.25L21 19M3 5.25h18v13.5H3V5.25Z')}
+      </ToolbarButton>
+
+      <Divider />
+
+      <ToolbarDropdown label="جدول" active={inTable} trigger={stroke('M3 4.5h18v15H3v-15Zm0 5h18M9 4.5v15')}>
+        {(close) => (
+          <div className="flex flex-col gap-0.5">
+            <DropdownItem
+              disabled={inTable}
+              onClick={() => {
+                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                close();
+              }}
+            >
+              درج جدول ۳×۳
+            </DropdownItem>
+            <DropdownItem
+              disabled={!inTable}
+              onClick={() => {
+                editor.chain().focus().addRowAfter().run();
+                close();
+              }}
+            >
+              افزودن سطر
+            </DropdownItem>
+            <DropdownItem
+              disabled={!inTable}
+              onClick={() => {
+                editor.chain().focus().deleteRow().run();
+                close();
+              }}
+            >
+              حذف سطر
+            </DropdownItem>
+            <DropdownItem
+              disabled={!inTable}
+              onClick={() => {
+                editor.chain().focus().addColumnAfter().run();
+                close();
+              }}
+            >
+              افزودن ستون
+            </DropdownItem>
+            <DropdownItem
+              disabled={!inTable}
+              onClick={() => {
+                editor.chain().focus().deleteColumn().run();
+                close();
+              }}
+            >
+              حذف ستون
+            </DropdownItem>
+            <DropdownItem
+              disabled={!inTable}
+              onClick={() => {
+                editor.chain().focus().deleteTable().run();
+                close();
+              }}
+            >
+              حذف جدول
+            </DropdownItem>
+          </div>
+        )}
+      </ToolbarDropdown>
+
+      <Divider />
+
+      <ToolbarButton
+        label="اصلاح حروف عربی به فارسی (ي→ی، ك→ک)"
+        onClick={() => convertSelectionToPersianLetters(editor)}
+      >
+        <span className="text-sm">ی/ک</span>
+      </ToolbarButton>
+      <ToolbarButton
+        label="تبدیل ارقام به فارسی (۰۱۲…)"
+        onClick={() => convertSelectionToPersianDigits(editor)}
+      >
+        <span className="text-sm">۱۲۳</span>
+      </ToolbarButton>
+      <ToolbarButton label="افزودن گیومه « »" onClick={() => insertGuillemets(editor)}>
+        <span className="text-sm">«»</span>
+      </ToolbarButton>
+      <ToolbarButton
+        label="افزودن نیم‌فاصله (Ctrl+Shift+2)"
+        onClick={() => editor.chain().focus().insertContent(ZWNJ).run()}
+      >
+        <span className="text-[11px]">نیم‌فاصله</span>
       </ToolbarButton>
 
       <Divider />
@@ -241,6 +516,16 @@ export function RichTextEditor({ value, onChange, onNotify, resetKey = 0 }: Rich
       }),
       Image.configure({ HTMLAttributes: { class: 'rounded-xl' } }),
       Placeholder.configure({ placeholder: EDITOR_PLACEHOLDER }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph', 'blockquote'],
+        alignments: ['right', 'center', 'left', 'justify'],
+        defaultAlignment: 'right',
+      }),
+      Highlight.configure({ multicolor: true }),
+      Direction.configure({ types: DIRECTION_TYPES }),
+      TableKit.configure({ table: { resizable: true } }),
+      CharacterCount.configure({}),
+      PersianTools,
     ],
     content: value,
     // Toolbar state (bold on/off, undo availability) has to follow the selection.
@@ -332,12 +617,11 @@ export function RichTextEditor({ value, onChange, onNotify, resetKey = 0 }: Rich
 
   if (!editor || editor.isDestroyed) return null;
 
-  const text = editor.getText();
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const words = editor.storage.characterCount.words() as number;
   const minutes = Math.max(1, Math.ceil(words / 200));
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
+    <div className="richtext-editor overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
       <Toolbar
         editor={editor}
         uploading={uploading}
@@ -360,9 +644,8 @@ export function RichTextEditor({ value, onChange, onNotify, resetKey = 0 }: Rich
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
         <span>
-          {toPersianDigits(words)} واژه · {toPersianDigits(text.length)} نویسه
+          {toPersianDigits(words)} کلمه · {toPersianDigits(minutes)} دقیقه خواندن
         </span>
-        <span>حدود {toPersianDigits(minutes)} دقیقه مطالعه</span>
       </div>
     </div>
   );

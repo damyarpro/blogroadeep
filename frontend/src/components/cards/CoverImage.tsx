@@ -16,7 +16,7 @@ export function CoverImage({
       <div
         role="img"
         aria-label={alt}
-        className={`flex items-center justify-center bg-gradient-to-br from-indigo-100 to-slate-100 text-indigo-300 dark:from-slate-800 dark:to-slate-900 dark:text-slate-700 ${className}`}
+        className={`flex items-center justify-center bg-ink-800 text-ink-400 ${className}`}
       >
         <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.3} stroke="currentColor" className="h-12 w-12">
           <path

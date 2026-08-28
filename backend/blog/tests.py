@@ -536,6 +536,37 @@ class ContentSanitizationTests(PanelTestData):
     def setUp(self):
         self.token = self.login()
 
+    def test_text_align_style_survives_on_paragraphs(self):
+        from .sanitize import sanitize_html
+
+        self.assertEqual(
+            sanitize_html('<p style="text-align: center">x</p>'),
+            '<p style="text-align: center">x</p>',
+        )
+        # Any other property, alone or combined, drops the whole attribute.
+        self.assertEqual(sanitize_html('<p style="position:fixed">x</p>'), "<p>x</p>")
+        self.assertEqual(
+            sanitize_html('<p style="text-align:center;position:fixed">x</p>'),
+            "<p>x</p>",
+        )
+
+    def test_highlight_color_survives_on_mark_only(self):
+        from .sanitize import sanitize_html
+
+        self.assertEqual(
+            sanitize_html('<mark style="background-color: #fde68a">x</mark>'),
+            '<mark style="background-color: #fde68a">x</mark>',
+        )
+        self.assertEqual(
+            sanitize_html('<mark style="background-color: url(javascript:1)">x</mark>'),
+            "<mark>x</mark>",
+        )
+        # style is not whitelisted on span at all.
+        self.assertEqual(
+            sanitize_html('<span style="background-color:#fde68a">x</span>'),
+            "<span>x</span>",
+        )
+
     def test_script_is_stripped_from_submitted_content(self):
         response = self.client.post(
             reverse("blog:admin-post-list"),

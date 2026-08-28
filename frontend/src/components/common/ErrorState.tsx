@@ -8,21 +8,25 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-10 text-center dark:border-rose-900/50 dark:bg-rose-950/30"
+      className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl bg-ink-950 px-6 py-12 text-center dark:bg-ink-900"
     >
-      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} stroke="currentColor" className="h-10 w-10 text-rose-500">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
-        />
-      </svg>
-      <p className="text-sm font-medium text-rose-700 dark:text-rose-300">{message}</p>
+      <span aria-hidden="true" className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-300 text-ink-950">
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-7 w-7">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.5v4.5m0 3.5h.01" />
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+      </span>
+
+      <div>
+        <p className="text-lg font-black tracking-tight text-bone-50">دریافت اطلاعات ممکن نشد</p>
+        <p className="mt-2 text-sm leading-7 text-bone-300">{message}</p>
+      </div>
+
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-rose-700"
+          className="press rounded-full bg-mint-300 px-6 py-2.5 text-sm font-bold whitespace-nowrap text-ink-950 transition-colors duration-150 hover:bg-mint-400"
         >
           تلاش دوباره
         </button>

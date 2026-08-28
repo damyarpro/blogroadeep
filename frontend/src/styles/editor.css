@@ -1,0 +1,192 @@
+/* Authoring-panel-only styles: the Tiptap editing surface and the Jalali date
+ * picker popup. Layered on top of `.prose-fa` from src/index.css (read-only,
+ * not touched here) — this file only adds what the editor needs beyond it. */
+
+/* The editing surface already carries `.prose-fa`, which sets the Vazirmatn
+ * font at the page-body level; pin it explicitly here too so the editor never
+ * silently falls back to a system font if that chain ever changes. */
+.richtext-editor .ProseMirror {
+  font-family: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+}
+
+.richtext-editor .ProseMirror:focus {
+  outline: none;
+}
+
+/* Highlight mark: visible immediately while authoring even though the
+ * multicolor `style`/`data-color` attributes are currently stripped by the
+ * backend sanitizer (see report) — `mark` itself is whitelisted, so a plain
+ * highlight still survives with the browser's default yellow. */
+.richtext-editor .ProseMirror mark {
+  border-radius: 0.2em;
+  padding: 0 0.05em;
+}
+
+/* Table editing chrome (Tiptap's table extension expects host CSS for the
+ * selected-cell overlay and column-resize handle; base cell borders already
+ * come from `.prose-fa :is(th, td)`). */
+.richtext-editor .ProseMirror table {
+  overflow: hidden;
+}
+
+.richtext-editor .ProseMirror td,
+.richtext-editor .ProseMirror th {
+  position: relative;
+  vertical-align: top;
+}
+
+.richtext-editor .ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-color: rgb(99 102 241 / 0.15);
+}
+
+[data-theme='dark'] .richtext-editor .ProseMirror .selectedCell::after {
+  background-color: rgb(129 140 248 / 0.22);
+}
+
+.richtext-editor .ProseMirror .column-resize-handle {
+  position: absolute;
+  inset-inline-end: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 3px;
+  background-color: var(--color-indigo-500, #6366f1);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Jalali publish-date picker (react-multi-date-picker), restyled to match the
+ * panel's slate/indigo surface in both themes.
+ * ------------------------------------------------------------------------- */
+
+.jalali-field .rmdp-container {
+  width: 100%;
+  display: block;
+}
+
+.jalali-field input.jalali-field-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-slate-300, #cbd5e1);
+  background-color: var(--color-white, #fff);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-slate-900, #0f172a);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.jalali-field input.jalali-field-input:focus {
+  border-color: var(--color-indigo-500, #6366f1);
+}
+
+[data-theme='dark'] .jalali-field input.jalali-field-input {
+  border-color: var(--color-slate-700, #334155);
+  background-color: var(--color-slate-900, #0f172a);
+  color: var(--color-slate-100, #f1f5f9);
+}
+
+.jalali-panel.rmdp-wrapper {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--color-slate-200, #e2e8f0);
+  box-shadow: 0 12px 32px -8px rgb(15 23 42 / 0.25);
+  font-family: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+}
+
+.jalali-panel .rmdp-calendar {
+  background-color: var(--color-white, #fff);
+}
+
+.jalali-panel .rmdp-day-picker,
+.jalali-panel .rmdp-header {
+  background-color: var(--color-white, #fff);
+  color: var(--color-slate-800, #1e293b);
+}
+
+.jalali-panel .rmdp-week-day {
+  color: var(--color-slate-400, #94a3b8);
+}
+
+.jalali-panel .rmdp-day span {
+  border-radius: 9999px;
+}
+
+.jalali-panel .rmdp-day.rmdp-today span {
+  background-color: var(--color-slate-200, #e2e8f0);
+  color: var(--color-slate-900, #0f172a);
+}
+
+.jalali-panel .rmdp-day.rmdp-selected span:not(.highlight) {
+  background-color: var(--color-indigo-600, #4f46e5);
+  box-shadow: none;
+  color: #fff;
+}
+
+.jalali-panel .rmdp-arrow {
+  border-color: var(--color-slate-500, #64748b);
+}
+
+.jalali-panel .rmdp-arrow-container:hover {
+  background-color: var(--color-indigo-50, #eef2ff);
+}
+
+.jalali-panel .rmdp-arrow-container:hover .rmdp-arrow {
+  border-color: var(--color-indigo-600, #4f46e5);
+}
+
+.jalali-panel .rmdp-header-values {
+  color: var(--color-slate-900, #0f172a);
+}
+
+.jalali-panel .rmdp-time-picker div input {
+  color: var(--color-slate-900, #0f172a);
+  font-family: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-theme='dark'] .jalali-panel.rmdp-wrapper {
+  border-color: var(--color-slate-700, #334155);
+  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.55);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-calendar,
+[data-theme='dark'] .jalali-panel .rmdp-day-picker,
+[data-theme='dark'] .jalali-panel .rmdp-header {
+  background-color: var(--color-slate-900, #0f172a);
+  color: var(--color-slate-100, #f1f5f9);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-header-values {
+  color: var(--color-slate-100, #f1f5f9);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-day span {
+  color: var(--color-slate-200, #e2e8f0);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-day.rmdp-today span {
+  background-color: var(--color-slate-700, #334155);
+  color: var(--color-slate-50, #f8fafc);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-day.rmdp-disabled span {
+  color: var(--color-slate-600, #475569);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-week-day {
+  color: var(--color-slate-500, #64748b);
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-time-picker div input {
+  color: var(--color-slate-100, #f1f5f9);
+  background: transparent;
+}
+
+[data-theme='dark'] .jalali-panel .rmdp-time-picker .rmdp-am {
+  color: var(--color-slate-100, #f1f5f9);
+}
