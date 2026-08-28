@@ -19,14 +19,14 @@ export function ShareLinks({ url, title }: { url: string; title: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm text-slate-500 dark:text-slate-400">اشتراک‌گذاری:</span>
+      <span className="text-sm text-ink-600 dark:text-bone-400">اشتراک‌گذاری:</span>
       {links.map((link) => (
         <a
           key={link.label}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="press rounded-full border border-slate-200 px-3.5 py-1.5 text-xs whitespace-nowrap text-slate-600 transition-colors duration-150 hover:border-indigo-300 hover:text-indigo-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-indigo-800 dark:hover:text-indigo-300"
+          className="press rounded-full border border-ink-950 px-3.5 py-1.5 text-xs font-bold whitespace-nowrap text-ink-950 transition-colors duration-150 hover:bg-ink-950 hover:text-bone-50 dark:border-bone-400 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950 dark:hover:border-mint-300"
         >
           {link.label}
         </a>

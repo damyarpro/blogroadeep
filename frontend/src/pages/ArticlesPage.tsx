@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchPosts, fetchCategories, ApiError } from '../lib/api';
 import type { Category, PostSummary } from '../lib/types';
-import { PostCard } from '../components/cards/PostCard';
+import { PostCard, type CardTone } from '../components/cards/PostCard';
 import { PostGridSkeleton } from '../components/common/Skeletons';
 import { ErrorState } from '../components/common/ErrorState';
 import { Seo } from '../components/seo/Seo';
@@ -11,17 +11,25 @@ import { toPersianDigits } from '../lib/format';
 
 const DEFAULT_PAGE_SIZE = 12;
 
-/* Radius system: surfaces = rounded-2xl, anything pressable = rounded-full. */
+/* Radius system: block surfaces = rounded-3xl, inset media = rounded-2xl,
+   anything pressable = rounded-full. */
 
-function Chevron({ className = '' }: { className?: string }) {
+/** Two solid tiles per grid page keep the bento rhythm without looking random. */
+function toneFor(index: number): CardTone {
+  if (index === 0) return 'ink';
+  if (index === 4) return 'mint';
+  return 'bone';
+}
+
+function Arrow({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className={className} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="m15 6-6 6 6 6" />
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} stroke="currentColor" className={className} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m0 0 6-6m-6 6 6 6" />
     </svg>
   );
 }
 
-/** Prev/next with a page indicator: lighter than a numbered strip and easier on mobile. */
+/** Circular arrow buttons plus a page indicator: lighter than a numbered strip. */
 function ArticlesPagination({
   page,
   totalPages,
@@ -34,25 +42,23 @@ function ArticlesPagination({
   if (totalPages <= 1) return null;
 
   const buttonClass =
-    'press inline-flex items-center gap-2 rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-150 hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-transparent disabled:text-slate-400 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-900 dark:disabled:border-slate-800 dark:disabled:text-slate-600';
+    'press inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink-950 text-bone-50 transition-colors duration-150 hover:bg-forest-800 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-ink-400 disabled:ring-1 disabled:ring-bone-300 dark:bg-mint-300 dark:text-ink-950 dark:hover:bg-mint-400 dark:disabled:bg-transparent dark:disabled:text-ink-400 dark:disabled:ring-ink-700';
 
   return (
     <nav
       aria-label="صفحه‌بندی"
-      className="mt-12 flex items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800"
+      className="mt-14 flex items-center justify-between gap-4 border-t border-bone-300 pt-8 dark:border-ink-800"
     >
-      <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1} className={buttonClass}>
-        <Chevron className="h-4 w-4 rotate-180" />
-        <span className="whitespace-nowrap">قبلی</span>
+      <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1} className={buttonClass} aria-label="صفحه قبل">
+        <Arrow className="h-5 w-5 rotate-180" />
       </button>
 
-      <p aria-live="polite" className="text-sm whitespace-nowrap text-slate-500 dark:text-slate-400">
+      <p aria-live="polite" className="text-sm font-bold whitespace-nowrap text-ink-950 dark:text-bone-100">
         صفحه {toPersianDigits(page)} از {toPersianDigits(totalPages)}
       </p>
 
-      <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages} className={buttonClass}>
-        <span className="whitespace-nowrap">بعدی</span>
-        <Chevron className="h-4 w-4" />
+      <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages} className={buttonClass} aria-label="صفحه بعد">
+        <Arrow className="h-5 w-5" />
       </button>
     </nav>
   );
@@ -150,10 +156,10 @@ export function ArticlesPage() {
 
   const chipClass = (active: boolean) =>
     [
-      'press rounded-full px-4 py-2 text-sm whitespace-nowrap transition-colors duration-150',
+      'press rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors duration-150',
       active
-        ? 'bg-indigo-600 font-medium text-white hover:bg-indigo-700'
-        : 'border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-indigo-800 dark:hover:text-indigo-300',
+        ? 'bg-ink-950 text-mint-300 dark:bg-mint-300 dark:text-ink-950'
+        : 'bg-bone-200 text-ink-950 hover:bg-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950',
     ].join(' ');
 
   return (
@@ -161,22 +167,17 @@ export function ArticlesPage() {
       <Seo title="مقالات" description="فهرست مقالات بلاگ رودیپ همراه با امکان جستجو و فیلتر بر اساس دسته‌بندی." canonicalPath="/articles" />
 
       {/* Section 1 of 3: asymmetric page header, title on one side, tally on the other. */}
-      <section className="relative overflow-hidden border-b border-slate-200 dark:border-slate-800">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(45rem_20rem_at_15%_-40%,var(--color-indigo-100),transparent_70%)] dark:bg-[radial-gradient(45rem_20rem_at_15%_-40%,var(--color-indigo-950),transparent_70%)]"
-        />
-
+      <section className="border-b border-bone-300 dark:border-ink-800">
         <div className="mx-auto grid max-w-5xl gap-6 px-4 pt-16 pb-12 sm:px-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-8">
             <h1
-              className="rise text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl dark:text-white"
+              className="rise text-4xl leading-tight font-black tracking-tight text-ink-950 sm:text-5xl dark:text-bone-50"
               style={{ '--rise-delay': '0ms' } as React.CSSProperties}
             >
               مقالات
             </h1>
             <p
-              className="rise mt-4 max-w-lg leading-8 text-slate-600 dark:text-slate-400"
+              className="rise mt-5 max-w-lg leading-8 text-ink-600 dark:text-bone-300"
               style={{ '--rise-delay': '60ms' } as React.CSSProperties}
             >
               همهٔ نوشته‌ها یک‌جا. با جستجو یا دسته‌بندی، سریع‌تر به آنچه می‌خواهید برسید.
@@ -184,12 +185,14 @@ export function ArticlesPage() {
           </div>
 
           <p
-            className="rise text-sm text-slate-500 lg:col-span-4 lg:justify-self-end lg:pb-2 dark:text-slate-400"
+            className="rise lg:col-span-4 lg:justify-self-end lg:pb-2"
             style={{ '--rise-delay': '120ms' } as React.CSSProperties}
             aria-live="polite"
           >
-            {loading ? 'در حال بارگذاری…' : `${toPersianDigits(count)} مقاله`}
-            {!loading && activeCategory && <span className="text-slate-400 dark:text-slate-500"> در {activeCategory.name}</span>}
+            <span className="inline-block rounded-full bg-bone-200 px-4 py-2 text-sm font-bold text-ink-950 dark:bg-ink-800 dark:text-bone-100">
+              {loading ? 'در حال بارگذاری…' : `${toPersianDigits(count)} مقاله`}
+              {!loading && activeCategory && <span className="font-normal opacity-70"> در {activeCategory.name}</span>}
+            </span>
           </p>
         </div>
       </section>
@@ -206,15 +209,15 @@ export function ArticlesPage() {
             placeholder="جستجو در مقالات…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-full border border-slate-300 bg-white py-3 pe-11 ps-11 text-sm text-slate-800 outline-none transition-colors duration-150 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/25 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-indigo-400 [&::-webkit-search-cancel-button]:appearance-none"
+            className="w-full rounded-full border border-bone-300 bg-bone-50 py-3.5 pe-12 ps-12 text-sm text-ink-950 outline-none transition-colors duration-150 placeholder:text-ink-400 focus:border-forest-800 focus:ring-2 focus:ring-mint-400/60 dark:border-ink-700 dark:bg-ink-900 dark:text-bone-50 dark:focus:border-mint-300 [&::-webkit-search-cancel-button]:appearance-none"
           />
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            strokeWidth={1.8}
+            strokeWidth={2}
             stroke="currentColor"
             aria-hidden="true"
-            className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute start-4.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-600 dark:text-bone-400"
           >
             <circle cx="11" cy="11" r="7" />
             <path strokeLinecap="round" d="m20 20-3.5-3.5" />
@@ -225,9 +228,9 @@ export function ArticlesPage() {
               type="button"
               onClick={() => setSearchInput('')}
               aria-label="پاک کردن جستجو"
-              className="press absolute end-2.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="press absolute end-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-bone-200 text-ink-950 transition-colors duration-150 hover:bg-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950"
             >
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} stroke="currentColor" className="h-4 w-4" aria-hidden="true">
                 <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
@@ -248,9 +251,7 @@ export function ArticlesPage() {
                 aria-pressed={category === cat.slug}
               >
                 {cat.name}
-                <span className={category === cat.slug ? 'ms-2 text-indigo-200' : 'ms-2 text-slate-400 dark:text-slate-600'}>
-                  {toPersianDigits(cat.post_count)}
-                </span>
+                <span className="ms-2 font-normal opacity-70">{toPersianDigits(cat.post_count)}</span>
               </button>
             ))}
           </div>
@@ -258,26 +259,21 @@ export function ArticlesPage() {
       </section>
 
       {/* Section 3 of 3: results. */}
-      <section className="mx-auto max-w-5xl px-4 pt-10 pb-16 sm:px-6">
+      <section className="mx-auto max-w-5xl px-4 pt-10 pb-20 sm:px-6">
         {loading && <PostGridSkeleton />}
 
         {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
 
         {!loading && !error && posts.length === 0 && (
-          <div className="rise mx-auto max-w-md rounded-2xl border border-dashed border-slate-300 px-6 py-14 text-center dark:border-slate-700">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              strokeWidth={1.4}
-              stroke="currentColor"
-              aria-hidden="true"
-              className="mx-auto h-11 w-11 text-slate-300 dark:text-slate-600"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path strokeLinecap="round" d="m20 20-3.5-3.5" />
-            </svg>
-            <p className="mt-5 text-lg font-bold text-slate-900 dark:text-white">نتیجه‌ای پیدا نشد</p>
-            <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">
+          <div className="rise mx-auto max-w-lg rounded-3xl bg-mint-300 px-6 py-14 text-center sm:px-10">
+            <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ink-950 text-mint-300">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-6 w-6">
+                <circle cx="11" cy="11" r="7" />
+                <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+              </svg>
+            </span>
+            <p className="mt-6 text-2xl font-black tracking-tight text-ink-950">نتیجه‌ای پیدا نشد</p>
+            <p className="mt-3 leading-7 text-forest-900">
               {hasFilters
                 ? 'با این جستجو یا فیلتر مقاله‌ای نداریم. عبارت دیگری را امتحان کنید یا فیلترها را بردارید.'
                 : 'هنوز مقاله‌ای منتشر نشده است. به‌زودی سر بزنید.'}
@@ -286,7 +282,7 @@ export function ArticlesPage() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="press mt-6 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors duration-150 hover:bg-indigo-700"
+                className="press mt-7 rounded-full bg-ink-950 px-7 py-3 text-sm font-bold whitespace-nowrap text-bone-50 transition-colors duration-150 hover:bg-forest-900"
               >
                 پاک کردن فیلترها
               </button>
@@ -299,7 +295,7 @@ export function ArticlesPage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post, index) => (
                 <div key={post.id} className="rise" style={{ '--rise-delay': `${index * 45}ms` } as React.CSSProperties}>
-                  <PostCard post={post} />
+                  <PostCard post={post} tone={toneFor(index)} />
                 </div>
               ))}
             </div>

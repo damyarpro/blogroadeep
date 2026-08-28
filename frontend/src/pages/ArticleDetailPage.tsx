@@ -11,7 +11,8 @@ import { ArticleSkeleton } from '../components/common/Skeletons';
 import { ErrorState } from '../components/common/ErrorState';
 import { Seo, SITE_NAME } from '../components/seo/Seo';
 
-/* Radius system: surfaces = rounded-2xl, anything pressable = rounded-full. */
+/* Radius system: block surfaces = rounded-3xl, inset media = rounded-2xl,
+   anything pressable = rounded-full. */
 
 /**
  * Thin scroll-position bar. Written straight to the node's transform from a
@@ -49,12 +50,12 @@ function ReadingProgress() {
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[3px]">
-      <div ref={barRef} className="h-full origin-right bg-indigo-600 dark:bg-indigo-400" style={{ transform: 'scaleX(0)' }} />
+      <div ref={barRef} className="h-full origin-right bg-forest-800 dark:bg-mint-300" style={{ transform: 'scaleX(0)' }} />
     </div>
   );
 }
 
-/** Related items get list rows, not another card grid, so the eye reads them as a footnote. */
+/** Related items get list rows on a solid block, not another tile grid. */
 function RelatedRow({ post }: { post: PostSummary }) {
   const readingTime = formatReadingTime(post.reading_time);
 
@@ -62,13 +63,13 @@ function RelatedRow({ post }: { post: PostSummary }) {
     <li>
       <Link
         to={`/articles/${post.slug}`}
-        className="press group flex items-center gap-4 rounded-full px-4 py-4 transition-colors duration-150 hover:bg-white dark:hover:bg-slate-900"
+        className="press group flex items-center gap-4 rounded-full px-5 py-5 transition-colors duration-150 hover:bg-ink-900 dark:hover:bg-ink-800"
       >
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium text-slate-800 transition-colors duration-150 group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
+          <span className="block truncate font-bold tracking-tight text-bone-50 transition-colors duration-150 group-hover:text-mint-300">
             {post.title}
           </span>
-          <span className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-slate-400 dark:text-slate-500">
+          <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-bone-400">
             <time dateTime={post.published_at}>{formatJalaliDate(post.published_at)}</time>
             {readingTime && (
               <>
@@ -78,16 +79,15 @@ function RelatedRow({ post }: { post: PostSummary }) {
             )}
           </span>
         </span>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          strokeWidth={2}
-          stroke="currentColor"
+
+        <span
           aria-hidden="true"
-          className="h-4 w-4 shrink-0 text-slate-300 transition-colors duration-150 group-hover:text-indigo-600 dark:text-slate-600 dark:group-hover:text-indigo-400"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink-800 text-bone-100 transition-colors duration-150 group-hover:bg-mint-300 group-hover:text-ink-950 dark:bg-ink-700"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="m15 6-6 6 6 6" />
-        </svg>
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} stroke="currentColor" className="h-4 w-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m0 0 6-6m-6 6 6 6" />
+          </svg>
+        </span>
       </Link>
     </li>
   );
@@ -148,16 +148,16 @@ export function ArticleDetailPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <Seo title="مقاله یافت نشد" noIndex canonicalPath={`/articles/${slug}`} />
-        <h1 className="rise text-2xl font-bold text-slate-900 dark:text-white">مقاله یافت نشد</h1>
+        <h1 className="rise text-3xl font-black tracking-tight text-ink-950 dark:text-bone-50">مقاله یافت نشد</h1>
         <p
-          className="rise mt-3 leading-8 text-slate-500 dark:text-slate-400"
+          className="rise mt-4 leading-8 text-ink-600 dark:text-bone-300"
           style={{ '--rise-delay': '60ms' } as React.CSSProperties}
         >
           مقاله‌ای با این نشانی وجود ندارد یا حذف شده است.
         </p>
         <Link
           to="/articles"
-          className="press rise mt-8 inline-block rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors duration-150 hover:bg-indigo-700"
+          className="press rise mt-8 inline-block rounded-full bg-mint-300 px-7 py-3 text-sm font-bold whitespace-nowrap text-ink-950 transition-colors duration-150 hover:bg-mint-400"
           style={{ '--rise-delay': '120ms' } as React.CSSProperties}
         >
           بازگشت به فهرست مقالات
@@ -208,28 +208,23 @@ export function ArticleDetailPage() {
       <ReadingProgress />
 
       <article>
-        {/* Section 1: title band, a centred column with a soft wash behind it. */}
-        <header className="relative overflow-hidden border-b border-slate-200 dark:border-slate-800">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(45rem_22rem_at_80%_-30%,var(--color-indigo-100),transparent_70%)] dark:bg-[radial-gradient(45rem_22rem_at_80%_-30%,var(--color-indigo-950),transparent_70%)]"
-          />
-
+        {/* Section 1: title band, a centred column on bare bone paper. */}
+        <header className="border-b border-bone-300 dark:border-ink-800">
           <div className="mx-auto max-w-3xl px-4 pt-10 pb-14 sm:px-6">
-            <nav aria-label="مسیر جاری" className="rise text-sm text-slate-500 dark:text-slate-400">
-              <Link to="/" className="transition-colors duration-150 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <nav aria-label="مسیر جاری" className="rise text-sm text-ink-600 dark:text-bone-400">
+              <Link to="/" className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300">
                 خانه
               </Link>
-              <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>
-              <Link to="/articles" className="transition-colors duration-150 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <span className="mx-2 text-bone-400 dark:text-ink-700">/</span>
+              <Link to="/articles" className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300">
                 مقالات
               </Link>
               {post.category && (
                 <>
-                  <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>
+                  <span className="mx-2 text-bone-400 dark:text-ink-700">/</span>
                   <Link
                     to={`/articles?category=${post.category.slug}`}
-                    className="transition-colors duration-150 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300"
                   >
                     {post.category.name}
                   </Link>
@@ -240,7 +235,7 @@ export function ArticleDetailPage() {
             {post.category && (
               <Link
                 to={`/articles?category=${post.category.slug}`}
-                className="press rise mt-6 inline-block rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 transition-colors duration-150 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
+                className="press rise mt-6 inline-block rounded-full bg-mint-300 px-4 py-1.5 text-xs font-bold text-ink-950 transition-colors duration-150 hover:bg-mint-400"
                 style={{ '--rise-delay': '40ms' } as React.CSSProperties}
               >
                 {post.category.name}
@@ -248,17 +243,17 @@ export function ArticleDetailPage() {
             )}
 
             <h1
-              className="rise mt-4 text-3xl font-extrabold leading-[1.3] text-slate-900 sm:text-[2.6rem] sm:leading-[1.25] dark:text-white"
+              className="rise mt-5 text-4xl leading-[1.2] font-black tracking-tight text-ink-950 sm:text-5xl sm:leading-[1.15] dark:text-bone-50"
               style={{ '--rise-delay': '80ms' } as React.CSSProperties}
             >
               {post.title}
             </h1>
 
             <div
-              className="rise mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400"
+              className="rise mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-600 dark:text-bone-400"
               style={{ '--rise-delay': '140ms' } as React.CSSProperties}
             >
-              <span className="font-medium text-slate-700 dark:text-slate-300">{post.author.full_name}</span>
+              <span className="font-bold text-ink-950 dark:text-bone-100">{post.author.full_name}</span>
               <span aria-hidden="true">·</span>
               <time dateTime={post.published_at}>{formatJalaliDate(post.published_at)}</time>
               {readingTime && (
@@ -271,52 +266,47 @@ export function ArticleDetailPage() {
           </div>
         </header>
 
-        {/* Section 2: the read itself; the cover breaks the band above it. */}
+        {/* Section 2: the read itself; the cover hangs in a charcoal frame over the rule. */}
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <CoverImage
-            src={post.cover_image}
-            alt={post.title}
-            className="relative -mt-8 h-60 w-full rounded-2xl ring-1 ring-slate-200 sm:h-80 dark:ring-slate-800"
-          />
+          <div className="-mt-8 rounded-3xl bg-ink-950 p-2 dark:bg-ink-900">
+            <CoverImage src={post.cover_image} alt={post.title} className="h-60 w-full rounded-2xl sm:h-80" />
+          </div>
 
           <div
-            className="prose-fa mt-12 max-w-none text-[17px] leading-8 text-slate-700 dark:text-slate-300"
+            className="prose-fa mt-12 max-w-none text-[17px] leading-8 text-ink-700 dark:text-bone-200"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          <div className="mt-12 flex flex-col gap-5 border-t border-slate-200 pt-8 dark:border-slate-800">
+          <div className="mt-12 flex flex-col gap-5 border-t border-bone-300 pt-8 dark:border-ink-800">
             <TagList tags={post.tags} />
             <ShareLinks url={typeof window !== 'undefined' ? window.location.href : canonicalPath} title={post.title} />
           </div>
         </div>
       </article>
 
-      <div className="mx-auto max-w-3xl px-4 pb-4 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 pb-6 sm:px-6">
         <CommentSection slug={post.slug} comments={post.comments ?? []} />
       </div>
 
-      {/* Section 3: a quiet full-width strip, on purpose unlike the article column. */}
+      {/* Section 3: a solid charcoal strip, on purpose unlike the article column. */}
       {related.length > 0 && (
-        <section
-          aria-labelledby="related-heading"
-          className="mt-16 border-t border-slate-200 bg-slate-50 py-14 dark:border-slate-800 dark:bg-slate-900/40"
-        >
-          <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <div className="mb-4 flex items-baseline justify-between gap-4 px-4">
-              <h2 id="related-heading" className="text-xl font-bold text-slate-900 dark:text-white">
+        <section aria-labelledby="related-heading" className="mx-auto max-w-3xl px-4 pt-10 pb-20 sm:px-6">
+          <div className="rounded-3xl bg-ink-950 p-4 sm:p-6 dark:bg-ink-900">
+            <div className="mb-3 flex items-baseline justify-between gap-4 px-5">
+              <h2 id="related-heading" className="text-xl font-black tracking-tight text-bone-50">
                 در همین دسته
               </h2>
               {post.category && (
                 <Link
                   to={`/articles?category=${post.category.slug}`}
-                  className="text-sm font-medium whitespace-nowrap text-indigo-600 transition-colors duration-150 hover:text-indigo-700 hover:underline dark:text-indigo-400"
+                  className="press text-sm font-bold whitespace-nowrap text-mint-300 transition-colors duration-150 hover:text-mint-200"
                 >
                   مشاهده همه
                 </Link>
               )}
             </div>
 
-            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+            <ul className="divide-y divide-ink-800 dark:divide-ink-700">
               {related.map((item) => (
                 <RelatedRow key={item.id} post={item} />
               ))}
