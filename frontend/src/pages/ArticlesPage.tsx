@@ -100,6 +100,17 @@ export function ArticlesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
+  // The masthead's search button links here with ?focus=search; honour it once,
+  // then drop the parameter so the URL stays clean and shareable.
+  useEffect(() => {
+    if (searchParams.get('focus') !== 'search') return;
+    document.getElementById('article-search')?.focus();
+    const next = new URLSearchParams(searchParams);
+    next.delete('focus');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   useEffect(() => {
     fetchCategories()
       .then(setCategories)
