@@ -10,13 +10,13 @@ export function NotFoundPage() {
 
       <p
         aria-hidden="true"
-        className="rise rounded-3xl bg-mint-300 px-10 py-6 text-7xl font-black tracking-tight text-ink-950 tabular-nums sm:px-14 sm:text-8xl"
+        className="rise rounded-[2rem] bg-mint-300 px-12 py-8 text-8xl font-black tracking-tight text-ink-950 tabular-nums sm:px-16 sm:text-9xl"
       >
         ۴۰۴
       </p>
 
       <h1
-        className="rise mt-9 text-3xl font-black tracking-tight text-ink-950 sm:text-4xl dark:text-bone-50"
+        className="rise mt-10 text-4xl font-black tracking-tight text-ink-950 sm:text-5xl dark:text-bone-50"
         style={{ '--rise-delay': '60ms' } as React.CSSProperties}
       >
         این صفحه پیدا نشد

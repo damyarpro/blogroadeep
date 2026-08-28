@@ -54,9 +54,9 @@ export function PostCard({ post, tone = 'bone' }: { post: PostSummary; tone?: Ca
   return (
     <article className={`lift group flex h-full flex-col overflow-hidden rounded-3xl ${toneShell[tone]}`}>
       {/* The cover sits in a charcoal frame, like a mounted photograph. */}
-      <div className={`p-1.5 ${toneFrame[tone]}`}>
+      <div className={`p-2 ${toneFrame[tone]}`}>
         <Link to={`/articles/${post.slug}`} className="block" tabIndex={-1} aria-hidden="true">
-          <CoverImage src={post.cover_image} alt="" className="h-44 w-full rounded-2xl" />
+          <CoverImage src={post.cover_image} alt="" seed={post.slug} className="h-44 w-full rounded-2xl" />
         </Link>
       </div>
 
@@ -70,7 +70,7 @@ export function PostCard({ post, tone = 'bone' }: { post: PostSummary; tone?: Ca
           </Link>
         )}
 
-        <h3 className={`text-lg leading-snug font-black tracking-tight ${toneTitle[tone]}`}>
+        <h3 className={`text-xl leading-snug font-black tracking-tight ${toneTitle[tone]}`}>
           <Link to={`/articles/${post.slug}`}>{post.title}</Link>
         </h3>
 

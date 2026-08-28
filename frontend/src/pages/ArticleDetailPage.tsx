@@ -208,23 +208,23 @@ export function ArticleDetailPage() {
       <ReadingProgress />
 
       <article>
-        {/* Section 1: title band, a centred column on bare bone paper. */}
-        <header className="border-b border-bone-300 dark:border-ink-800">
-          <div className="mx-auto max-w-3xl px-4 pt-10 pb-14 sm:px-6">
-            <nav aria-label="مسیر جاری" className="rise text-sm text-ink-600 dark:text-bone-400">
-              <Link to="/" className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300">
+        {/* Section 1: the title band is an ink board with the cover framed inside it. */}
+        <header className="mx-auto max-w-5xl px-4 pt-6 sm:px-6">
+          <div className="rounded-[2rem] bg-ink-950 p-6 sm:p-10 lg:p-12 dark:bg-ink-900">
+            <nav aria-label="مسیر جاری" className="rise text-sm text-bone-400">
+              <Link to="/" className="transition-colors duration-150 hover:text-mint-300">
                 خانه
               </Link>
-              <span className="mx-2 text-bone-400 dark:text-ink-700">/</span>
-              <Link to="/articles" className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300">
+              <span className="mx-2 text-ink-700 dark:text-ink-800">/</span>
+              <Link to="/articles" className="transition-colors duration-150 hover:text-mint-300">
                 مقالات
               </Link>
               {post.category && (
                 <>
-                  <span className="mx-2 text-bone-400 dark:text-ink-700">/</span>
+                  <span className="mx-2 text-ink-700 dark:text-ink-800">/</span>
                   <Link
                     to={`/articles?category=${post.category.slug}`}
-                    className="transition-colors duration-150 hover:text-forest-800 dark:hover:text-mint-300"
+                    className="transition-colors duration-150 hover:text-mint-300"
                   >
                     {post.category.name}
                   </Link>
@@ -232,68 +232,89 @@ export function ArticleDetailPage() {
               )}
             </nav>
 
-            {post.category && (
-              <Link
-                to={`/articles?category=${post.category.slug}`}
-                className="press rise mt-6 inline-block rounded-full bg-mint-300 px-4 py-1.5 text-xs font-bold text-ink-950 transition-colors duration-150 hover:bg-mint-400"
-                style={{ '--rise-delay': '40ms' } as React.CSSProperties}
-              >
-                {post.category.name}
-              </Link>
-            )}
+            <div className="mt-8 grid items-center gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                {post.category && (
+                  <Link
+                    to={`/articles?category=${post.category.slug}`}
+                    className="press rise inline-block rounded-full bg-mint-300 px-4 py-1.5 text-xs font-bold text-ink-950 transition-colors duration-150 hover:bg-mint-400"
+                    style={{ '--rise-delay': '40ms' } as React.CSSProperties}
+                  >
+                    {post.category.name}
+                  </Link>
+                )}
 
-            <h1
-              className="rise mt-5 text-4xl leading-[1.2] font-black tracking-tight text-ink-950 sm:text-5xl sm:leading-[1.15] dark:text-bone-50"
-              style={{ '--rise-delay': '80ms' } as React.CSSProperties}
-            >
-              {post.title}
-            </h1>
+                <h1
+                  className="rise mt-5 text-[2.35rem] leading-[1.15] font-black tracking-tight text-bone-50 sm:text-5xl sm:leading-[1.1]"
+                  style={{ '--rise-delay': '80ms' } as React.CSSProperties}
+                >
+                  {post.title}
+                </h1>
 
-            <div
-              className="rise mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-600 dark:text-bone-400"
-              style={{ '--rise-delay': '140ms' } as React.CSSProperties}
-            >
-              <span className="font-bold text-ink-950 dark:text-bone-100">{post.author.full_name}</span>
-              <span aria-hidden="true">·</span>
-              <time dateTime={post.published_at}>{formatJalaliDate(post.published_at)}</time>
-              {readingTime && (
-                <>
+                <div
+                  className="rise mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-bone-400"
+                  style={{ '--rise-delay': '140ms' } as React.CSSProperties}
+                >
+                  <span className="font-bold text-bone-100">{post.author.full_name}</span>
                   <span aria-hidden="true">·</span>
-                  <span>{readingTime}</span>
-                </>
-              )}
+                  <time dateTime={post.published_at}>{formatJalaliDate(post.published_at)}</time>
+                  {readingTime && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>{readingTime}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div
+                className="rise lg:col-span-5"
+                style={{ '--rise-delay': '200ms' } as React.CSSProperties}
+                aria-hidden="true"
+              >
+                <div className="rounded-3xl bg-ink-900 p-2 dark:bg-ink-950">
+                  <CoverImage
+                    src={post.cover_image}
+                    alt=""
+                    seed={post.slug}
+                    className="h-52 w-full rounded-2xl sm:h-64"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Section 2: the read itself; the cover hangs in a charcoal frame over the rule. */}
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="-mt-8 rounded-3xl bg-ink-950 p-2 dark:bg-ink-900">
-            <CoverImage src={post.cover_image} alt={post.title} className="h-60 w-full rounded-2xl sm:h-80" />
-          </div>
+        {/* Section 2: the read itself, on a bone board so the column feels like paper. */}
+        <div className="mx-auto max-w-5xl px-4 pt-5 sm:px-6">
+          <div className="rounded-[2rem] border border-bone-300 bg-bone-50 px-5 py-10 sm:px-10 sm:py-14 dark:border-ink-700 dark:bg-ink-900">
+            <div className="mx-auto max-w-2xl">
+              <div
+                className="prose-fa max-w-none text-[17px] leading-8 text-ink-700 dark:text-bone-200"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
 
-          <div
-            className="prose-fa mt-12 max-w-none text-[17px] leading-8 text-ink-700 dark:text-bone-200"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-
-          <div className="mt-12 flex flex-col gap-5 border-t border-bone-300 pt-8 dark:border-ink-800">
-            <TagList tags={post.tags} />
-            <ShareLinks url={typeof window !== 'undefined' ? window.location.href : canonicalPath} title={post.title} />
+              <div className="mt-12 flex flex-col gap-5 border-t border-bone-300 pt-8 dark:border-ink-800">
+                <TagList tags={post.tags} />
+                <ShareLinks url={typeof window !== 'undefined' ? window.location.href : canonicalPath} title={post.title} />
+              </div>
+            </div>
           </div>
         </div>
       </article>
 
-      <div className="mx-auto max-w-3xl px-4 pb-6 sm:px-6">
-        <CommentSection slug={post.slug} comments={post.comments ?? []} />
+      <div className="mx-auto max-w-5xl px-4 pb-6 sm:px-6">
+        <div className="mx-auto max-w-2xl">
+          <CommentSection slug={post.slug} comments={post.comments ?? []} />
+        </div>
       </div>
 
       {/* Section 3: a solid charcoal strip, on purpose unlike the article column. */}
       {related.length > 0 && (
-        <section aria-labelledby="related-heading" className="mx-auto max-w-3xl px-4 pt-10 pb-20 sm:px-6">
-          <div className="rounded-3xl bg-ink-950 p-4 sm:p-6 dark:bg-ink-900">
+        <section aria-labelledby="related-heading" className="mx-auto max-w-5xl px-4 pt-10 pb-20 sm:px-6">
+          <div className="rounded-[2rem] bg-ink-950 p-5 sm:p-8 dark:bg-ink-900">
             <div className="mb-3 flex items-baseline justify-between gap-4 px-5">
-              <h2 id="related-heading" className="text-xl font-black tracking-tight text-bone-50">
+              <h2 id="related-heading" className="text-2xl font-black tracking-tight text-bone-50">
                 در همین دسته
               </h2>
               {post.category && (

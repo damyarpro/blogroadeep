@@ -12,10 +12,10 @@
    Public-site palette: warm bone paper, near-black ink, one green accent family
    (vivid mint for fills and highlights, deep forest as its dark companion).
    Every pairing used in the UI clears WCAG AA:
-     ink-950 on mint-300  13.2:1     bone-50 on ink-900   17.1:1
-     ink-950 on bone-100  17.2:1     bone-300 on ink-900  11.5:1
+     ink-950 on mint-300  13.2:1     bone-50 on ink-900   17.2:1
+     ink-950 on bone-100  17.2:1     bone-300 on ink-900  11.8:1
      ink-600 on bone-100   7.3:1     mint-300 on ink-900  12.1:1
-     forest-800 on bone-100 8.3:1    bone-50 on forest-900 12.2:1
+     forest-800 on bone-100 8.3:1    bone-50 on forest-900 12.3:1
    ink-400 / bone-400 are decorative only (icons, rules), never small text.
    The authoring panel keeps the older slate/indigo scale, which is untouched.
    --------------------------------------------------------------------------- */
@@ -23,11 +23,11 @@
 @theme {
   --font-sans: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
 
-  --color-bone-50: #fbfaf6;
-  --color-bone-100: #f3f1ea;
-  --color-bone-200: #e6e2d7;
-  --color-bone-300: #d5cfc0;
-  --color-bone-400: #a8a294;
+  --color-bone-50: #fbfbf9;
+  --color-bone-100: #f1f1ee;
+  --color-bone-200: #e5e5e0;
+  --color-bone-300: #d3d3cb;
+  --color-bone-400: #a6a6a0;
 
   --color-ink-400: #8a908c;
   --color-ink-600: #4b504d;
@@ -48,9 +48,10 @@
 }
 
 /* Radius system for the public site:
-     block surfaces (cards, panels, frames, section blocks) = rounded-3xl
-     media sitting inset inside a frame                     = rounded-2xl
-     anything pressable (buttons, pills, chips, inputs)     = rounded-full */
+     full-width section boards (hero, article band, related) = rounded-[2rem]
+     cards, panels, tiles, image frames                      = rounded-3xl
+     media sitting inset inside a frame                      = rounded-2xl
+     anything pressable (buttons, pills, chips, inputs)      = rounded-full */
 
 html {
   scroll-behavior: smooth;

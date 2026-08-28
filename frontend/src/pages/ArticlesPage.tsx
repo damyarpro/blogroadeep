@@ -171,7 +171,7 @@ export function ArticlesPage() {
         <div className="mx-auto grid max-w-5xl gap-6 px-4 pt-16 pb-12 sm:px-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-8">
             <h1
-              className="rise text-4xl leading-tight font-black tracking-tight text-ink-950 sm:text-5xl dark:text-bone-50"
+              className="rise text-[2.75rem] leading-[1.1] font-black tracking-tight text-ink-950 sm:text-6xl dark:text-bone-50"
               style={{ '--rise-delay': '0ms' } as React.CSSProperties}
             >
               مقالات
@@ -265,14 +265,14 @@ export function ArticlesPage() {
         {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
 
         {!loading && !error && posts.length === 0 && (
-          <div className="rise mx-auto max-w-lg rounded-3xl bg-mint-300 px-6 py-14 text-center sm:px-10">
+          <div className="rise mx-auto max-w-lg rounded-[2rem] bg-mint-300 px-6 py-16 text-center sm:px-10">
             <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ink-950 text-mint-300">
               <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-6 w-6">
                 <circle cx="11" cy="11" r="7" />
                 <path strokeLinecap="round" d="m20 20-3.5-3.5" />
               </svg>
             </span>
-            <p className="mt-6 text-2xl font-black tracking-tight text-ink-950">نتیجه‌ای پیدا نشد</p>
+            <p className="mt-6 text-3xl font-black tracking-tight text-ink-950">نتیجه‌ای پیدا نشد</p>
             <p className="mt-3 leading-7 text-forest-900">
               {hasFilters
                 ? 'با این جستجو یا فیلتر مقاله‌ای نداریم. عبارت دیگری را امتحان کنید یا فیلترها را بردارید.'
