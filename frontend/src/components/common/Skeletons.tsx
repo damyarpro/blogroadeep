@@ -31,17 +31,27 @@ export function PostGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
+/** Mirrors the article layout: title band, cover breaking out of it, then the text column. */
 export function ArticleSkeleton() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10" aria-hidden="true">
-      <Pulse className="mb-4 h-4 w-24" />
-      <Pulse className="mb-3 h-9 w-full" />
-      <Pulse className="mb-6 h-9 w-2/3" />
-      <Pulse className="mb-8 h-64 w-full" />
-      <div className="space-y-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Pulse key={index} className="h-4 w-full" />
-        ))}
+    <div aria-hidden="true">
+      <div className="border-b border-slate-200 dark:border-slate-800">
+        <div className="mx-auto max-w-3xl px-4 pt-10 pb-14 sm:px-6">
+          <Pulse className="h-4 w-40" />
+          <div className="mt-6 h-6 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+          <Pulse className="mt-4 h-9 w-full" />
+          <Pulse className="mt-3 h-9 w-2/3" />
+          <Pulse className="mt-6 h-4 w-56" />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+        <div className="-mt-8 h-60 w-full animate-pulse rounded-2xl bg-slate-200 sm:h-80 dark:bg-slate-800" />
+        <div className="mt-12 space-y-3">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <Pulse key={index} className={index % 3 === 2 ? 'h-4 w-2/3' : 'h-4 w-full'} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -10,10 +10,10 @@ const navItems = [
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return [
-    'rounded-full px-3 py-1.5 text-sm font-medium transition',
+    'press rounded-full px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150',
     isActive
-      ? 'bg-indigo-600 text-white'
-      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
   ].join(' ');
 }
 
@@ -23,10 +23,13 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <NavLink to="/" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+        <NavLink
+          to="/"
+          className="press flex items-center gap-2 text-lg font-bold text-slate-900 transition-colors duration-150 hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
+        >
           <span
             aria-hidden="true"
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-white"
           >
             ر
           </span>
@@ -46,7 +49,7 @@ export function Header() {
           {isStaff && (
             <Link
               to="/admin"
-              className="rounded-full border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
+              className="press rounded-full border border-indigo-200 px-3.5 py-1.5 text-xs font-medium whitespace-nowrap text-indigo-600 transition-colors duration-150 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
             >
               پنل نویسنده
             </Link>

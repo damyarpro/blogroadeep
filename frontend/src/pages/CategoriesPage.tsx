@@ -4,9 +4,66 @@ import { fetchCategories, ApiError } from '../lib/api';
 import type { Category } from '../lib/types';
 import { ErrorState } from '../components/common/ErrorState';
 import { Seo } from '../components/seo/Seo';
+import { toPersianDigits } from '../lib/format';
 
-function CategoryCardSkeleton() {
-  return <div className="h-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" aria-hidden="true" />;
+/* Radius system: surfaces = rounded-2xl, anything pressable = rounded-full. */
+
+function CategoryRowSkeleton() {
+  return (
+    <li className="flex items-center gap-5 px-5 py-7 sm:px-8" aria-hidden="true">
+      <div className="h-6 w-6 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+      <div className="flex-1 space-y-3">
+        <div className="h-5 w-40 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+        <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+      </div>
+    </li>
+  );
+}
+
+function CategoryRow({ category, index }: { category: Category; index: number }) {
+  return (
+    <li className="rise" style={{ '--rise-delay': `${index * 55}ms` } as React.CSSProperties}>
+      <Link
+        to={`/articles?category=${category.slug}`}
+        className="press group flex items-start gap-5 px-5 py-7 transition-colors duration-150 hover:bg-slate-50 sm:px-8 dark:hover:bg-slate-900/60"
+      >
+        <span
+          aria-hidden="true"
+          className="mt-0.5 text-sm font-medium text-slate-300 tabular-nums transition-colors duration-150 group-hover:text-indigo-500 dark:text-slate-700"
+        >
+          {toPersianDigits(index + 1)}
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-lg font-bold text-slate-900 transition-colors duration-150 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+              {category.name}
+            </span>
+            <span className="text-xs whitespace-nowrap text-slate-400 dark:text-slate-500">
+              {toPersianDigits(category.post_count)} مقاله
+            </span>
+          </span>
+
+          {category.description && (
+            <span className="mt-2 block max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
+              {category.description}
+            </span>
+          )}
+        </span>
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeWidth={2}
+          stroke="currentColor"
+          aria-hidden="true"
+          className="mt-1.5 h-4 w-4 shrink-0 text-slate-300 transition-colors duration-150 group-hover:text-indigo-600 dark:text-slate-700 dark:group-hover:text-indigo-400"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="m15 6-6 6 6 6" />
+        </svg>
+      </Link>
+    </li>
+  );
 }
 
 export function CategoriesPage() {
@@ -36,42 +93,70 @@ export function CategoriesPage() {
     };
   }, [reloadKey]);
 
+  const total = categories?.reduce((sum, cat) => sum + cat.post_count, 0) ?? 0;
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <>
       <Seo title="دسته‌بندی‌ها" description="فهرست کامل دسته‌بندی‌های بلاگ رودیپ." canonicalPath="/categories" />
 
-      <h1 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white">دسته‌بندی‌ها</h1>
-
-      {loading && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CategoryCardSkeleton key={i} />
-          ))}
-        </div>
-      )}
-
-      {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
-
-      {!loading && !error && categories && categories.length === 0 && (
-        <p className="text-center text-slate-500 dark:text-slate-400">دسته‌بندی‌ای ثبت نشده است.</p>
-      )}
-
-      {!loading && !error && categories && categories.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((cat) => (
-            <Link
-              key={cat.slug}
-              to={`/articles?category=${cat.slug}`}
-              className="flex items-center justify-between rounded-2xl border border-slate-200 p-5 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:hover:border-indigo-700"
+      {/* Section 1 of 2: narrow intro column, offset from the list below it. */}
+      <section className="mx-auto max-w-5xl px-4 pt-16 pb-10 sm:px-6">
+        <div className="max-w-xl">
+          <h1 className="rise text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl dark:text-white">
+            دسته‌بندی‌ها
+          </h1>
+          <p
+            className="rise mt-4 leading-8 text-slate-600 dark:text-slate-400"
+            style={{ '--rise-delay': '60ms' } as React.CSSProperties}
+          >
+            نوشته‌ها بر اساس موضوع مرتب شده‌اند. یکی را انتخاب کنید تا فهرست مقاله‌های همان موضوع را ببینید.
+          </p>
+          {!loading && !error && categories && categories.length > 0 && (
+            <p
+              className="rise mt-4 text-sm text-slate-400 dark:text-slate-500"
+              style={{ '--rise-delay': '120ms' } as React.CSSProperties}
             >
-              <span className="font-medium text-slate-800 dark:text-slate-200">{cat.name}</span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                {cat.post_count} مقاله
-              </span>
-            </Link>
-          ))}
+              {toPersianDigits(categories.length)} دسته‌بندی، در مجموع {toPersianDigits(total)} مقاله
+            </p>
+          )}
         </div>
-      )}
-    </div>
+      </section>
+
+      {/* Section 2 of 2: one generous list surface, not a card grid. */}
+      <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
+        {loading && (
+          <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <CategoryRowSkeleton key={i} />
+            ))}
+          </ul>
+        )}
+
+        {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
+
+        {!loading && !error && categories && categories.length === 0 && (
+          <div className="rise mx-auto max-w-md rounded-2xl border border-dashed border-slate-300 px-6 py-14 text-center dark:border-slate-700">
+            <p className="text-lg font-bold text-slate-900 dark:text-white">هنوز دسته‌بندی‌ای نداریم</p>
+            <p className="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">
+              به‌جای آن می‌توانید همهٔ نوشته‌ها را در فهرست مقالات ببینید.
+            </p>
+            <Link
+              to="/articles"
+              className="press mt-6 inline-block rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors duration-150 hover:bg-indigo-700"
+            >
+              رفتن به مقالات
+            </Link>
+          </div>
+        )}
+
+        {!loading && !error && categories && categories.length > 0 && (
+          <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            {categories.map((cat, index) => (
+              <CategoryRow key={cat.slug} category={cat} index={index} />
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

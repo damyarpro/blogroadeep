@@ -14,6 +14,7 @@ import { formatJalaliDateTime, toPersianDigits } from '../../lib/format';
 import { analyzeContent } from '../../lib/seoChecks';
 import { useDebouncedValue } from '../../lib/useDebouncedValue';
 import { CoverImageField } from '../../components/admin/CoverImageField';
+import { JalaliDateTimeField } from '../../components/admin/JalaliDateTimeField';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 import { SeoPanel, type SeoValues } from '../../components/admin/SeoPanel';
 import { SlugField } from '../../components/admin/SlugField';
@@ -67,21 +68,6 @@ function suggestSlug(value: string): string {
     .replace(/[-\s]+/g, '-');
 }
 
-/** ISO 8601 → the `YYYY-MM-DDTHH:mm` shape `<input type="datetime-local">` wants. */
-function toLocalInput(iso: string | null): string {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return '';
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function fromLocalInput(local: string): string | null {
-  if (!local) return null;
-  const date = new Date(local);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
-}
-
 function formFromPost(post: AdminPost): EditorForm {
   return {
     title: post.title,
@@ -91,7 +77,9 @@ function formFromPost(post: AdminPost): EditorForm {
     categoryId: post.category ?? null,
     tagIds: post.tags.map((tag) => tag.id),
     status: post.status,
-    publishedAt: toLocalInput(post.published_at),
+    // Stored as an ISO 8601 string (or '' when unset) end-to-end — JalaliDateTimeField
+    // owns converting that to/from the Jalali display the author sees.
+    publishedAt: post.published_at ?? '',
     metaTitle: post.meta_title ?? '',
     metaDescription: post.meta_description ?? '',
     metaKeywords: post.meta_keywords ?? '',
@@ -277,7 +265,7 @@ export function PostEditorPage() {
         category: form.categoryId,
         tags: form.tagIds,
         status,
-        published_at: fromLocalInput(form.publishedAt),
+        published_at: form.publishedAt || null,
         meta_title: form.metaTitle,
         meta_description: form.metaDescription,
         meta_keywords: form.metaKeywords,
@@ -614,17 +602,16 @@ export function PostEditorPage() {
               <label htmlFor="post-published-at" className={label}>
                 تاریخ و ساعت انتشار
               </label>
-              <input
+              <JalaliDateTimeField
                 id="post-published-at"
-                type="datetime-local"
-                dir="ltr"
-                className={`${input} text-start`}
                 value={form.publishedAt}
-                onChange={(event) => patch({ publishedAt: event.target.value })}
+                onChange={(iso) => patch({ publishedAt: iso })}
+                placeholder="انتخاب تاریخ و ساعت شمسی…"
               />
               <p className={hint}>
-                خالی بگذارید تا هنگام انتشار، زمان همان لحظه ثبت شود.
-                {form.publishedAt && ` (${formatJalaliDateTime(fromLocalInput(form.publishedAt))})`}
+                {form.publishedAt
+                  ? `انتشار: ${formatJalaliDateTime(form.publishedAt)}`
+                  : 'خالی بگذارید تا هنگام انتشار، زمان همان لحظه ثبت شود.'}
               </p>
             </div>
 

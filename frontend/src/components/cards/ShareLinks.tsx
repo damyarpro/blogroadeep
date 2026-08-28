@@ -26,7 +26,7 @@ export function ShareLinks({ url, title }: { url: string; title: string }) {
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-300 dark:hover:text-indigo-400"
+          className="press rounded-full border border-slate-200 px-3.5 py-1.5 text-xs whitespace-nowrap text-slate-600 transition-colors duration-150 hover:border-indigo-300 hover:text-indigo-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-indigo-800 dark:hover:text-indigo-300"
         >
           {link.label}
         </a>

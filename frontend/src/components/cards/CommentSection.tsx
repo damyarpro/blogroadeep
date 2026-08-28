@@ -1,18 +1,26 @@
 import { useState, type FormEvent } from 'react';
 import type { Comment } from '../../lib/types';
-import { formatJalaliDateTime } from '../../lib/format';
+import { formatJalaliDateTime, toPersianDigits } from '../../lib/format';
 import { submitComment, ApiError } from '../../lib/api';
 
+/* Radius system: surfaces = rounded-2xl, pressables and single-line inputs = rounded-full. */
+
+const fieldClass =
+  'w-full border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-colors duration-150 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/25 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-indigo-400';
+
+const labelClass = 'mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300';
+
+/** Avatar-less thread row: the name and the words carry it, nothing else. */
 function CommentItem({ comment }: { comment: Comment }) {
   return (
-    <li className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-      <div className="mb-1 flex items-center justify-between gap-3">
-        <span className="font-medium text-slate-800 dark:text-slate-200">{comment.name}</span>
-        <time dateTime={comment.created_at} className="text-xs text-slate-400">
+    <li className="py-5">
+      <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <span className="font-medium text-slate-800 dark:text-slate-100">{comment.name}</span>
+        <time dateTime={comment.created_at} className="text-xs text-slate-400 dark:text-slate-500">
           {formatJalaliDateTime(comment.created_at)}
         </time>
       </div>
-      <p className="whitespace-pre-line text-sm leading-7 text-slate-600 dark:text-slate-400">{comment.body}</p>
+      <p className="text-sm leading-7 whitespace-pre-line text-slate-600 dark:text-slate-400">{comment.body}</p>
     </li>
   );
 }
@@ -43,38 +51,46 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
   }
 
   return (
-    <section aria-labelledby="comments-heading" className="mt-12">
-      <h2 id="comments-heading" className="mb-4 text-xl font-bold text-slate-900 dark:text-white">
-        دیدگاه‌ها {comments.length > 0 && `(${comments.length})`}
-      </h2>
+    <section aria-labelledby="comments-heading" className="mt-16">
+      <div className="mb-2 flex items-baseline gap-3">
+        <h2 id="comments-heading" className="text-xl font-bold text-slate-900 dark:text-white">
+          دیدگاه‌ها
+        </h2>
+        {comments.length > 0 && (
+          <span className="text-sm text-slate-400 dark:text-slate-500">{toPersianDigits(comments.length)} دیدگاه</span>
+        )}
+      </div>
 
       {comments.length > 0 ? (
-        <ul className="mb-8 flex flex-col gap-3">
+        <ul className="mb-10 divide-y divide-slate-200 dark:divide-slate-800">
           {comments.map((comment, index) => (
             <CommentItem key={`${comment.created_at}-${index}`} comment={comment} />
           ))}
         </ul>
       ) : (
-        <p className="mb-8 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mb-10 text-sm leading-7 text-slate-500 dark:text-slate-400">
           هنوز دیدگاهی ثبت نشده است. اولین نفری باشید که نظر می‌دهد.
         </p>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-        <h3 className="mb-4 text-base font-bold text-slate-900 dark:text-white">ثبت دیدگاه</h3>
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900/50">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">ثبت دیدگاه</h3>
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+          نشانی ایمیل شما منتشر نمی‌شود و فقط برای پاسخ به کار می‌رود.
+        </p>
 
         {status === 'success' ? (
           <p
             role="status"
-            className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300"
           >
-            دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده خواهد شد.
+            دیدگاه شما ثبت شد و در انتظار تأیید مدیر است. پس از بررسی، زیر همین مقاله نمایش داده می‌شود.
           </p>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="comment-name" className="mb-1 block text-sm text-slate-600 dark:text-slate-300">
+                <label htmlFor="comment-name" className={labelClass}>
                   نام
                 </label>
                 <input
@@ -84,11 +100,11 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"
+                  className={`${fieldClass} rounded-full`}
                 />
               </div>
               <div>
-                <label htmlFor="comment-email" className="mb-1 block text-sm text-slate-600 dark:text-slate-300">
+                <label htmlFor="comment-email" className={labelClass}>
                   ایمیل
                 </label>
                 <input
@@ -98,22 +114,23 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"
+                  className={`${fieldClass} rounded-full`}
                 />
               </div>
             </div>
+
             <div>
-              <label htmlFor="comment-body" className="mb-1 block text-sm text-slate-600 dark:text-slate-300">
+              <label htmlFor="comment-body" className={labelClass}>
                 دیدگاه
               </label>
               <textarea
                 id="comment-body"
                 name="body"
                 required
-                rows={4}
+                rows={5}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"
+                className={`${fieldClass} rounded-2xl leading-7`}
               />
             </div>
 
@@ -126,7 +143,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
             <button
               type="submit"
               disabled={status === 'submitting'}
-              className="w-fit rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="press w-fit rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors duration-150 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status === 'submitting' ? 'در حال ارسال…' : 'ارسال دیدگاه'}
             </button>

@@ -37,5 +37,9 @@ export function formatReadingTime(minutes: number | null | undefined): string {
 
 export function toPersianDigits(value: string | number): string {
   const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return String(value).replace(/[0-9]/g, (d) => digits[Number(d)]);
+  // Handles both ASCII 0-9 and Arabic-Indic ٠-٩ (e.g. pasted from Arabic text).
+  return String(value).replace(/[0-9٠-٩]/g, (d) => {
+    const code = d.charCodeAt(0);
+    return digits[code >= 0x0660 ? code - 0x0660 : code - 0x30];
+  });
 }
