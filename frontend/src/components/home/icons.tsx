@@ -87,6 +87,33 @@ export function BookmarkIcon({ filled, className = 'h-4 w-4' }: IconProps & { fi
   );
 }
 
+/* Share glyphs. Simple functional marks, drawn here so the page pulls no icon
+   font or third-party asset. Each button carries its own visible-to-AT label. */
+
+export function TelegramIcon({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M21.6 4.3 2.9 11.5c-.9.3-.9 1.6.1 1.9l4.6 1.4 1.8 5.4c.3.8 1.3 1 1.9.4l2.6-2.5 4.6 3.4c.7.5 1.6.1 1.8-.7l3-14.6c.2-.9-.7-1.6-1.7-1.2Zm-3 3.4-7.8 7c-.3.2-.4.5-.5.9l-.3 2.2-1.2-3.7 9.3-6.9c.4-.3.9.2.5.5Z" />
+    </svg>
+  );
+}
+
+export function XIcon({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M17.2 3h3.3l-7.2 8.3L21.8 21h-6.6l-5.2-6.5L4.1 21H.8l7.7-8.8L.4 3h6.8l4.7 6 5.3-6Zm-1.2 16h1.8L7.9 4.9H6l10 14.1Z" />
+    </svg>
+  );
+}
+
+export function WhatsAppIcon({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 2a9.9 9.9 0 0 0-8.5 15L2 22l5.2-1.4A9.9 9.9 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20Zm4.5-5.9c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.5.1l-.8.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.6 4c1.5.6 2.1.7 2.8.6a2.5 2.5 0 0 0 1.7-1.2 2 2 0 0 0 .1-1.2Z" />
+    </svg>
+  );
+}
+
 export function MenuIcon({ open, className = 'h-5 w-5' }: IconProps & { open: boolean }) {
   return (
     <svg viewBox="0 0 24 24" strokeWidth={2} {...stroke} className={className} aria-hidden="true">

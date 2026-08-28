@@ -111,12 +111,13 @@ Everything under `/admin` is wrapped in `RequireStaff`, lazy-loaded, and marked 
 
 ## Demo photography
 
-The home page is photo-led. `CoverImage` resolves a post's artwork in three steps:
+The public site is photo-led throughout. `CoverImage` resolves a post's artwork in
+three steps:
 
 1. the post's uploaded `cover_image`, when it has one;
 2. otherwise a deterministic placeholder from `https://picsum.photos/seed/<slug>/<w>/<h>`,
-   which is only requested when a caller passes the `photo` prop (the home page does;
-   the article page and the post grid do not, so their behaviour is unchanged);
+   requested only when a caller passes the `photo` prop (the home page, the articles
+   grid, the article cover, the related rows and the category cards all do);
 3. and, if that image fails to load too, the offline-safe generative `CoverArt` SVG.
 
 **The picsum photographs are demo placeholders, not editorial images.** Upload a real

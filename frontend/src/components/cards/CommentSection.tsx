@@ -2,21 +2,25 @@ import { useState, type FormEvent } from 'react';
 import type { Comment } from '../../lib/types';
 import { formatJalaliDateTime, toPersianDigits } from '../../lib/format';
 import { submitComment, ApiError } from '../../lib/api';
+import { cardShell, fieldClass, fieldLabelClass, pillShell, solidPill } from '../magazine/tokens';
 
-/* Radius system: block surfaces = rounded-3xl, single-line inputs and
-   pressables = rounded-full, the multi-line textarea = rounded-3xl. */
+/* Radius lock: cards = rounded-3xl, single-line inputs and pressables =
+   rounded-full, the multi-line textarea keeps the card radius. */
 
-const fieldClass =
-  'w-full border border-bone-300 bg-bone-50 px-5 py-3 text-sm text-ink-950 outline-none transition-colors duration-150 placeholder:text-ink-400 focus:border-forest-800 focus:ring-2 focus:ring-mint-400/60 dark:border-ink-700 dark:bg-ink-950 dark:text-bone-50 dark:focus:border-mint-300';
-
-const labelClass = 'mb-2 block text-sm font-bold text-ink-950 dark:text-bone-100';
-
-/** Avatar-less thread row: the name and the words carry it, nothing else. */
+/** Avatar-less thread card: a mint initial disc, the name, then the words. */
 function CommentItem({ comment }: { comment: Comment }) {
   return (
-    <li className="py-6">
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span className="font-bold text-ink-950 dark:text-bone-50">{comment.name}</span>
+    <li className={`p-5 sm:p-6 ${cardShell}`}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mint-300 text-xs font-black text-ink-950"
+          >
+            {comment.name.trim().charAt(0) || 'م'}
+          </span>
+          <span className="font-bold text-ink-950 dark:text-bone-50">{comment.name}</span>
+        </span>
         <time dateTime={comment.created_at} className="text-xs text-ink-600 dark:text-bone-400">
           {formatJalaliDateTime(comment.created_at)}
         </time>
@@ -53,47 +57,44 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
 
   return (
     <section aria-labelledby="comments-heading" className="mt-16">
-      <div className="mb-2 flex flex-wrap items-baseline gap-3">
-        <h2 id="comments-heading" className="text-3xl font-black tracking-tight text-ink-950 dark:text-bone-50">
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <h2 id="comments-heading" className="text-2xl font-black tracking-tight text-ink-950 dark:text-bone-50">
           دیدگاه‌ها
         </h2>
         {comments.length > 0 && (
-          <span className="rounded-full bg-bone-200 px-3 py-1 text-xs font-bold text-ink-950 dark:bg-ink-800 dark:text-bone-100">
+          <span className={`px-4 py-1.5 text-xs font-bold text-ink-950 dark:text-bone-100 ${pillShell}`}>
             {toPersianDigits(comments.length)} دیدگاه
           </span>
         )}
       </div>
 
       {comments.length > 0 ? (
-        <ul className="mb-10 divide-y divide-bone-300 dark:divide-ink-800">
+        <ul className="mb-8 flex flex-col gap-3">
           {comments.map((comment, index) => (
             <CommentItem key={`${comment.created_at}-${index}`} comment={comment} />
           ))}
         </ul>
       ) : (
-        <p className="mb-10 text-sm leading-7 text-ink-600 dark:text-bone-300">
+        <p className="mb-8 text-sm leading-7 text-ink-600 dark:text-bone-300">
           هنوز دیدگاهی ثبت نشده است. اولین نفری باشید که نظر می‌دهد.
         </p>
       )}
 
-      <div className="rounded-[2rem] border border-bone-300 bg-bone-50 p-7 sm:p-10 dark:border-ink-700 dark:bg-ink-900">
+      <div className={`p-6 sm:p-9 ${cardShell}`}>
         <h3 className="text-xl font-black tracking-tight text-ink-950 dark:text-bone-50">ثبت دیدگاه</h3>
         <p className="mt-2 text-sm text-ink-600 dark:text-bone-300">
           نشانی ایمیل شما منتشر نمی‌شود و فقط برای پاسخ به کار می‌رود.
         </p>
 
         {status === 'success' ? (
-          <p
-            role="status"
-            className="mt-6 rounded-3xl bg-mint-300 px-6 py-5 text-sm leading-7 font-medium text-ink-950"
-          >
+          <p role="status" className="mt-6 rounded-3xl bg-mint-300 px-6 py-5 text-sm leading-7 font-medium text-ink-950">
             دیدگاه شما ثبت شد و در انتظار تأیید مدیر است. پس از بررسی، زیر همین مقاله نمایش داده می‌شود.
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="comment-name" className={labelClass}>
+                <label htmlFor="comment-name" className={fieldLabelClass}>
                   نام
                 </label>
                 <input
@@ -107,7 +108,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
                 />
               </div>
               <div>
-                <label htmlFor="comment-email" className={labelClass}>
+                <label htmlFor="comment-email" className={fieldLabelClass}>
                   ایمیل
                 </label>
                 <input
@@ -123,7 +124,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
             </div>
 
             <div>
-              <label htmlFor="comment-body" className={labelClass}>
+              <label htmlFor="comment-body" className={fieldLabelClass}>
                 دیدگاه
               </label>
               <textarea
@@ -143,11 +144,7 @@ export function CommentSection({ slug, comments }: { slug: string; comments: Com
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
-              className="press w-fit rounded-full bg-ink-950 px-7 py-3 text-sm font-bold whitespace-nowrap text-bone-50 transition-colors duration-150 hover:bg-forest-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-mint-300 dark:text-ink-950 dark:hover:bg-mint-400"
-            >
+            <button type="submit" disabled={status === 'submitting'} className={`w-fit ${solidPill}`}>
               {status === 'submitting' ? 'در حال ارسال…' : 'ارسال دیدگاه'}
             </button>
           </form>

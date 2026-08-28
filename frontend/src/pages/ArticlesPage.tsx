@@ -2,8 +2,18 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchPosts, fetchCategories, ApiError } from '../lib/api';
 import type { Category, PostSummary } from '../lib/types';
-import { PostCard, type CardTone } from '../components/cards/PostCard';
-import { PostGridSkeleton } from '../components/common/Skeletons';
+import { PhotoCard, PhotoCardSkeleton } from '../components/magazine/PhotoCard';
+import { PageHeader } from '../components/magazine/PageHeader';
+import {
+  WIDE,
+  cardShell,
+  pillShell,
+  chipClass,
+  chipCountClass,
+  circleButtonClass,
+  solidPill,
+} from '../components/magazine/tokens';
+import { ArrowIcon, SearchIcon } from '../components/home/icons';
 import { ErrorState } from '../components/common/ErrorState';
 import { Seo } from '../components/seo/Seo';
 import { useDebouncedValue } from '../lib/useDebouncedValue';
@@ -11,23 +21,8 @@ import { toPersianDigits } from '../lib/format';
 
 const DEFAULT_PAGE_SIZE = 12;
 
-/* Radius system: block surfaces = rounded-3xl, inset media = rounded-2xl,
-   anything pressable = rounded-full. */
-
-/** Two solid tiles per grid page keep the bento rhythm without looking random. */
-function toneFor(index: number): CardTone {
-  if (index === 0) return 'ink';
-  if (index === 4) return 'mint';
-  return 'bone';
-}
-
-function Arrow({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} stroke="currentColor" className={className} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m0 0 6-6m-6 6 6 6" />
-    </svg>
-  );
-}
+/* The magazine index. Same card, same chips and same measure as the home page,
+   so moving between the two reads as one publication. */
 
 /** Circular arrow buttons plus a page indicator: lighter than a numbered strip. */
 function ArticlesPagination({
@@ -41,24 +36,33 @@ function ArticlesPagination({
 }) {
   if (totalPages <= 1) return null;
 
-  const buttonClass =
-    'press inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink-950 text-bone-50 transition-colors duration-150 hover:bg-forest-800 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-ink-400 disabled:ring-1 disabled:ring-bone-300 dark:bg-mint-300 dark:text-ink-950 dark:hover:bg-mint-400 dark:disabled:bg-transparent dark:disabled:text-ink-400 dark:disabled:ring-ink-700';
-
   return (
     <nav
       aria-label="صفحه‌بندی"
-      className="mt-14 flex items-center justify-between gap-4 border-t border-bone-300 pt-8 dark:border-ink-800"
+      className={`mt-14 flex items-center justify-between gap-4 px-5 py-4 sm:px-7 ${cardShell}`}
     >
-      <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1} className={buttonClass} aria-label="صفحه قبل">
-        <Arrow className="h-5 w-5 rotate-180" />
+      <button
+        type="button"
+        onClick={() => onChange(page - 1)}
+        disabled={page <= 1}
+        className={circleButtonClass}
+        aria-label="صفحه قبل"
+      >
+        <ArrowIcon className="h-5 w-5 rotate-180" />
       </button>
 
       <p aria-live="polite" className="text-sm font-bold whitespace-nowrap text-ink-950 dark:text-bone-100">
         صفحه {toPersianDigits(page)} از {toPersianDigits(totalPages)}
       </p>
 
-      <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages} className={buttonClass} aria-label="صفحه بعد">
-        <Arrow className="h-5 w-5" />
+      <button
+        type="button"
+        onClick={() => onChange(page + 1)}
+        disabled={page >= totalPages}
+        className={circleButtonClass}
+        aria-label="صفحه بعد"
+      >
+        <ArrowIcon className="h-5 w-5" />
       </button>
     </nav>
   );
@@ -165,81 +169,48 @@ export function ArticlesPage() {
   const hasFilters = Boolean(searchQuery || category || tag);
   const activeCategory = categories.find((cat) => cat.slug === category);
 
-  const chipClass = (active: boolean) =>
-    [
-      'press rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors duration-150',
-      active
-        ? 'bg-ink-950 text-mint-300 dark:bg-mint-300 dark:text-ink-950'
-        : 'bg-bone-200 text-ink-950 hover:bg-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950',
-    ].join(' ');
-
   return (
     <>
       <Seo title="مقالات" description="فهرست مقالات بلاگ رودیپ همراه با امکان جستجو و فیلتر بر اساس دسته‌بندی." canonicalPath="/articles" />
 
-      {/* Section 1 of 3: asymmetric page header, title on one side, tally on the other. */}
-      <section className="border-b border-bone-300 dark:border-ink-800">
-        <div className="mx-auto grid max-w-5xl gap-6 px-4 pt-16 pb-12 sm:px-6 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
-            <h1
-              className="rise text-[2.75rem] leading-[1.1] font-black tracking-tight text-ink-950 sm:text-6xl dark:text-bone-50"
-              style={{ '--rise-delay': '0ms' } as React.CSSProperties}
-            >
-              مقالات
-            </h1>
-            <p
-              className="rise mt-5 max-w-lg leading-8 text-ink-600 dark:text-bone-300"
-              style={{ '--rise-delay': '60ms' } as React.CSSProperties}
-            >
-              همهٔ نوشته‌ها یک‌جا. با جستجو یا دسته‌بندی، سریع‌تر به آنچه می‌خواهید برسید.
-            </p>
-          </div>
+      {/* Section 1 of 3: the same centred display header the home page opens with. */}
+      <PageHeader
+        title="همهٔ نوشته‌ها یک‌جا"
+        subtitle="با جستجو یا انتخاب موضوع، سریع‌تر به آنچه می‌خواهید برسید."
+      >
+        <span
+          aria-live="polite"
+          className={`inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-ink-950 dark:text-bone-100 ${pillShell}`}
+        >
+          {loading ? 'در حال بارگذاری…' : `${toPersianDigits(count)} مقاله`}
+          {!loading && activeCategory && (
+            <span className="font-normal text-ink-600 dark:text-bone-300">در {activeCategory.name}</span>
+          )}
+        </span>
+      </PageHeader>
 
-          <p
-            className="rise lg:col-span-4 lg:justify-self-end lg:pb-2"
-            style={{ '--rise-delay': '120ms' } as React.CSSProperties}
-            aria-live="polite"
-          >
-            <span className="inline-block rounded-full bg-bone-200 px-4 py-2 text-sm font-bold text-ink-950 dark:bg-ink-800 dark:text-bone-100">
-              {loading ? 'در حال بارگذاری…' : `${toPersianDigits(count)} مقاله`}
-              {!loading && activeCategory && <span className="font-normal opacity-70"> در {activeCategory.name}</span>}
-            </span>
-          </p>
-        </div>
-      </section>
-
-      {/* Section 2 of 3: control row, deliberately not boxed like the header band. */}
-      <section className="mx-auto max-w-5xl px-4 pt-8 sm:px-6">
+      {/* Section 2 of 3: the search field, then the subject rail from the home page. */}
+      <section className={`${WIDE} pt-2`} aria-label="جستجو و فیلتر">
         <label htmlFor="article-search" className="sr-only">
           جستجو در مقالات
         </label>
-        <div className="relative w-full sm:max-w-sm">
+        <div className={`relative mx-auto w-full max-w-xl overflow-hidden ${pillShell}`}>
           <input
             id="article-search"
             type="search"
             placeholder="جستجو در مقالات…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-full border border-bone-300 bg-bone-50 py-3.5 pe-12 ps-12 text-sm text-ink-950 outline-none transition-colors duration-150 placeholder:text-ink-400 focus:border-forest-800 focus:ring-2 focus:ring-mint-400/60 dark:border-ink-700 dark:bg-ink-900 dark:text-bone-50 dark:focus:border-mint-300 [&::-webkit-search-cancel-button]:appearance-none"
+            className="w-full rounded-full bg-transparent py-3.5 pe-14 ps-12 text-sm text-ink-950 outline-none transition-colors duration-150 placeholder:text-ink-400 focus:ring-2 focus:ring-mint-400/60 dark:text-bone-50 [&::-webkit-search-cancel-button]:appearance-none"
           />
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            strokeWidth={2}
-            stroke="currentColor"
-            aria-hidden="true"
-            className="pointer-events-none absolute start-4.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-600 dark:text-bone-400"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path strokeLinecap="round" d="m20 20-3.5-3.5" />
-          </svg>
+          <SearchIcon className="pointer-events-none absolute start-4.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-600 dark:text-bone-400" />
 
           {searchInput && (
             <button
               type="button"
               onClick={() => setSearchInput('')}
               aria-label="پاک کردن جستجو"
-              className="press absolute end-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-bone-200 text-ink-950 transition-colors duration-150 hover:bg-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950"
+              className="press absolute end-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-bone-200 text-ink-950 transition-colors duration-150 hover:bg-ink-950 hover:text-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950"
             >
               <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} stroke="currentColor" className="h-4 w-4" aria-hidden="true">
                 <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
@@ -249,8 +220,8 @@ export function ArticlesPage() {
         </div>
 
         {categories.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2.5" role="group" aria-label="فیلتر بر اساس دسته‌بندی">
-            <button type="button" onClick={() => setCategory('')} className={chipClass(!category)} aria-pressed={!category}>
+          <div className="snap-row -mx-4 mt-6 flex justify-start gap-3 overflow-x-auto px-4 py-2 sm:-mx-6 sm:px-6 lg:justify-center" role="group" aria-label="فیلتر بر اساس دسته‌بندی">
+            <button type="button" onClick={() => setCategory('')} className={`shrink-0 ${chipClass(!category)}`} aria-pressed={!category}>
               همه
             </button>
             {categories.map((cat) => (
@@ -258,43 +229,42 @@ export function ArticlesPage() {
                 key={cat.slug}
                 type="button"
                 onClick={() => setCategory(cat.slug)}
-                className={chipClass(category === cat.slug)}
+                className={`shrink-0 ${chipClass(category === cat.slug)}`}
                 aria-pressed={category === cat.slug}
               >
                 {cat.name}
-                <span className="ms-2 font-normal opacity-70">{toPersianDigits(cat.post_count)}</span>
+                <span className={chipCountClass(category === cat.slug)}>{toPersianDigits(cat.post_count)}</span>
               </button>
             ))}
           </div>
         )}
       </section>
 
-      {/* Section 3 of 3: results. */}
-      <section className="mx-auto max-w-5xl px-4 pt-10 pb-20 sm:px-6">
-        {loading && <PostGridSkeleton />}
+      {/* Section 3 of 3: results, in the house photo card. */}
+      <section className={`${WIDE} pt-10 pb-20`}>
+        {loading && (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <PhotoCardSkeleton key={index} />
+            ))}
+          </div>
+        )}
 
         {!loading && error && <ErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />}
 
         {!loading && !error && posts.length === 0 && (
-          <div className="rise mx-auto max-w-lg rounded-[2rem] bg-mint-300 px-6 py-16 text-center sm:px-10">
-            <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ink-950 text-mint-300">
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-6 w-6">
-                <circle cx="11" cy="11" r="7" />
-                <path strokeLinecap="round" d="m20 20-3.5-3.5" />
-              </svg>
+          <div className={`rise mx-auto max-w-lg px-6 py-16 text-center sm:px-10 ${cardShell}`}>
+            <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-mint-300 text-ink-950">
+              <SearchIcon className="h-6 w-6" />
             </span>
-            <p className="mt-6 text-3xl font-black tracking-tight text-ink-950">نتیجه‌ای پیدا نشد</p>
-            <p className="mt-3 leading-7 text-forest-900">
+            <p className="mt-6 text-3xl font-black tracking-tight text-ink-950 dark:text-bone-50">نتیجه‌ای پیدا نشد</p>
+            <p className="mt-3 leading-7 text-ink-600 dark:text-bone-300">
               {hasFilters
                 ? 'با این جستجو یا فیلتر مقاله‌ای نداریم. عبارت دیگری را امتحان کنید یا فیلترها را بردارید.'
                 : 'هنوز مقاله‌ای منتشر نشده است. به‌زودی سر بزنید.'}
             </p>
             {hasFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="press mt-7 rounded-full bg-ink-950 px-7 py-3 text-sm font-bold whitespace-nowrap text-bone-50 transition-colors duration-150 hover:bg-forest-900"
-              >
+              <button type="button" onClick={clearFilters} className={`mt-7 ${solidPill}`}>
                 پاک کردن فیلترها
               </button>
             )}
@@ -303,10 +273,14 @@ export function ArticlesPage() {
 
         {!loading && !error && posts.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post, index) => (
-                <div key={post.id} className="rise" style={{ '--rise-delay': `${index * 45}ms` } as React.CSSProperties}>
-                  <PostCard post={post} tone={toneFor(index)} />
+                <div
+                  key={post.id}
+                  className="rise h-full"
+                  style={{ '--rise-delay': `${index * 45}ms` } as React.CSSProperties}
+                >
+                  <PhotoCard post={post} eager={index === 0} />
                 </div>
               ))}
             </div>

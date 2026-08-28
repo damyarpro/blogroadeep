@@ -3,8 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, isStaticMode } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { StaticModeNotice } from '../components/admin/RequireStaff';
-import { input, label, primaryButton } from '../components/admin/panelStyles';
+import { cardShell, fieldClass, fieldLabelClass, solidPill } from '../components/magazine/tokens';
 import { Seo } from '../components/seo/Seo';
+
+/* The one panel door that lives on the public site, so it wears the magazine
+   chrome rather than the authoring panel's slate and indigo. */
 
 export function LoginPage() {
   const { user, login } = useAuth();
@@ -52,89 +55,93 @@ export function LoginPage() {
   if (isStaticMode) return <StaticModeNotice />;
 
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-16 sm:px-6">
-      <Seo title="ورود به پنل" noIndex />
+    <div className="hero-wash">
+      <div className="mx-auto flex w-full max-w-md flex-col px-4 pt-16 pb-24 sm:px-6">
+        <Seo title="ورود به پنل" noIndex />
 
-      <div className="mb-8 text-center">
-        <span
-          aria-hidden="true"
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-xl font-bold text-white"
-        >
-          ر
-        </span>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">ورود به پنل نویسنده</h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          برای نوشتن و مدیریت مقالات وارد حساب مدیریتی خود شوید.
-        </p>
-      </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/50"
-      >
-        <div>
-          <label htmlFor="login-username" className={label}>
-            نام کاربری
-          </label>
-          <input
-            id="login-username"
-            name="username"
-            type="text"
-            autoComplete="username"
-            dir="ltr"
-            className={`${input} text-start`}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+        <div className="mb-8 text-center">
+          <span
+            aria-hidden="true"
+            className="rise mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-mint-300 text-xl font-black text-ink-950"
+          >
+            ر
+          </span>
+          <h1 className="rise text-[2rem] leading-tight font-black tracking-tight text-ink-950 dark:text-bone-50">
+            ورود به پنل نویسنده
+          </h1>
+          <p
+            className="rise mt-3 text-sm text-ink-600 dark:text-bone-300"
+            style={{ '--rise-delay': '80ms' } as React.CSSProperties}
+          >
+            برای نوشتن و مدیریت مقالات وارد حساب مدیریتی خود شوید.
+          </p>
         </div>
 
-        <div>
-          <label htmlFor="login-password" className={label}>
-            رمز عبور
-          </label>
-          <div className="relative">
+        <form onSubmit={handleSubmit} className={`rise flex flex-col gap-5 p-6 sm:p-8 ${cardShell}`}>
+          <div>
+            <label htmlFor="login-username" className={fieldLabelClass}>
+              نام کاربری
+            </label>
             <input
-              id="login-password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
+              id="login-username"
+              name="username"
+              type="text"
+              autoComplete="username"
               dir="ltr"
-              className={`${input} pe-11 text-start`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              className={`${fieldClass} rounded-full text-start`}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((visible) => !visible)}
-              aria-label={showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور'}
-              className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              {showPassword ? 'پنهان' : 'نمایش'}
-            </button>
           </div>
-        </div>
 
-        {error && (
-          <p
-            role="alert"
-            className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+          <div>
+            <label htmlFor="login-password" className={fieldLabelClass}>
+              رمز عبور
+            </label>
+            <div className="relative">
+              <input
+                id="login-password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                dir="ltr"
+                className={`${fieldClass} rounded-full pe-24 text-start`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور'}
+                className="press absolute end-2 top-1/2 -translate-y-1/2 rounded-full bg-bone-200 px-4 py-1.5 text-xs font-bold text-ink-950 transition-colors duration-150 hover:bg-ink-950 hover:text-mint-300 dark:bg-ink-800 dark:text-bone-100 dark:hover:bg-mint-300 dark:hover:text-ink-950"
+              >
+                {showPassword ? 'پنهان' : 'نمایش'}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <p role="alert" className="rounded-3xl bg-ink-950 px-5 py-4 text-sm leading-7 text-bone-50 dark:bg-ink-800">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={submitting} className={`w-full ${solidPill}`}>
+            {submitting ? 'در حال ورود…' : 'ورود'}
+          </button>
+        </form>
+
+        <p className="mt-7 text-center text-sm text-ink-600 dark:text-bone-300">
+          <Link
+            to="/"
+            className="font-bold transition-colors duration-150 hover:text-ink-950 dark:hover:text-mint-300"
           >
-            {error}
-          </p>
-        )}
-
-        <button type="submit" disabled={submitting} className={primaryButton}>
-          {submitting ? 'در حال ورود…' : 'ورود'}
-        </button>
-      </form>
-
-      <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        <Link to="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-          بازگشت به صفحهٔ اصلی
-        </Link>
-      </p>
+            بازگشت به صفحهٔ اصلی
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
