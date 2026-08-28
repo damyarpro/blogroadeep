@@ -3,11 +3,18 @@
 // locale) while the value it reads/emits stays an ISO 8601 string — the exact
 // shape the API already expects — so nothing else in the payload changes.
 import { useMemo } from 'react';
-import DatePicker, { type Value } from 'react-multi-date-picker';
+import RawDatePicker, { type Value } from 'react-multi-date-picker';
 import DateObject from 'react-date-object';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
-import TimePicker from 'react-multi-date-picker/plugins/time_picker';
+import RawTimePicker from 'react-multi-date-picker/plugins/time_picker';
+
+// Vite's dev-time CJS→ESM interop (esbuild) doesn't unwrap these two modules'
+// nested `.default` the way Rollup's production build does — grab whichever
+// shape is actually the component so both `npm run dev` and `npm run build`
+// render the real component instead of the raw module namespace object.
+const DatePicker = (RawDatePicker as unknown as { default?: typeof RawDatePicker }).default ?? RawDatePicker;
+const TimePicker = (RawTimePicker as unknown as { default?: typeof RawTimePicker }).default ?? RawTimePicker;
 
 interface JalaliDateTimeFieldProps {
   id?: string;
