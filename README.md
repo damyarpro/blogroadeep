@@ -1,22 +1,53 @@
-# بلاگ رودیپ (blogroadeep)
+<div dir="rtl">
 
-یک وبسایت بلاگ فارسی با فرانت‌اند **React + Tailwind** و بک‌اند **Django REST**.
+# بلاگ رودیپ
 
-A Persian-language blog: React 19 + TypeScript + Tailwind v4 frontend (RTL, dark mode, SEO-ready) backed by a Django 5 + DRF API with sitemap, RSS, and comment moderation.
+وبسایت بلاگ فارسی و راست‌چین با فرانت‌اند **React + Tailwind** و بک‌اند **Django REST** — همراه با پنل نویسندگی داخلی، ادیتور فارسی، تقویم جلالی و زیرساخت کامل سئو.
 
-## Quick start
+**🌐 نسخهٔ نمایشی زنده:** <https://damyarpro.github.io/blogroadeep/>
 
-Backend (http://127.0.0.1:8000):
+## نمایی از سایت
+
+| صفحهٔ اصلی (روشن) | صفحهٔ اصلی (تاریک) |
+|---|---|
+| ![صفحهٔ اصلی در حالت روشن](docs/screenshots/home-light.png) | ![صفحهٔ اصلی در حالت تاریک](docs/screenshots/home-dark.png) |
+
+| فهرست مقالات | صفحهٔ مقاله |
+|---|---|
+| ![فهرست مقالات با جستجو و فیلتر](docs/screenshots/articles.png) | ![صفحهٔ خواندن مقاله](docs/screenshots/article.png) |
+
+**ادیتور فارسی پنل نویسندگی** — تراز متن، هایلایت، جدول، ابزارهای مخصوص فارسی (نیم‌فاصله، تبدیل ارقام، گیومه) و تقویم جلالی:
+
+![ادیتور فارسی با پنل سئو و تقویم جلالی](docs/screenshots/editor.png)
+
+## امکانات
+
+- صفحهٔ اصلی مجله‌ای، فهرست مقالات با جستجوی زنده و فیلتر دسته‌بندی و صفحه‌بندی همگام با URL، صفحهٔ مقاله، دسته‌بندی‌ها — همگی فارسی و راست‌چین با فونت وزیرمتن و حالت تاریک
+- **سئو**: متا و Open Graph و لینک canonical برای هر صفحه، دادهٔ ساخت‌یافتهٔ `BlogPosting`، و `sitemap.xml` و `robots.txt` و فید RSS از سمت جنگو
+- مقالات با دسته‌بندی، برچسب، تصویر شاخص، زمان مطالعه و فیلدهای سئوی اختصاصی (متا تایتل/دیسکریپشن/کلمات کلیدی/canonical)
+- **پنل نویسندگی داخلی** در مسیر `‎/admin` (ورود توکنی، مخصوص نویسنده): داشبورد، مدیریت نوشته‌ها، ادیتور غنی Tiptap با آپلود تصویر داخل متن، پنل سئو با پیش‌نمایش زندهٔ گوگل و چک‌لیست، ذخیرهٔ خودکار، مدیریت دیدگاه‌ها با تأیید گروهی، و مدیریت دسته و برچسب
+- دیدگاه‌ها با صف تأیید (تا تأیید نشوند نمایش داده نمی‌شوند)
+- پاک‌سازی HTML سمت سرور با `nh3` در هر ذخیره، تا هیچ محتوای ناامنی به صفحهٔ مقاله نرسد
+
+## اجرای پروژه
+
+**بک‌اند** (روی <http://127.0.0.1:8000>):
+
+<div dir="ltr">
 
 ```bash
 cd backend
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_blog          # Persian demo content (add --flush to reset)
+python manage.py seed_blog     # دادهٔ نمونهٔ فارسی؛ با ‎--flush ریست می‌شود
 python manage.py runserver
 ```
 
-Frontend (http://localhost:5173):
+</div>
+
+**فرانت‌اند** (روی <http://localhost:5173>):
+
+<div dir="ltr">
 
 ```bash
 cd frontend
@@ -25,30 +56,31 @@ cp .env.example .env
 npm run dev
 ```
 
-## Features
+</div>
 
-- Blog home, articles list (debounced search, category filter, pagination synced to URL), article detail, categories page — all Persian/RTL with Vazirmatn.
-- SEO: per-page meta/OG/twitter tags, canonical URLs, `BlogPosting` JSON-LD, semantic HTML; Django serves `sitemap.xml`, `robots.txt`, and RSS at `/feed/`.
-- Posts with categories, tags, cover images, reading time, and per-post SEO overrides (meta title/description/keywords, canonical).
-- Moderated comments (submitted via the site, approved from the in-site panel or Django admin).
-- **In-site author panel** at `/admin` (token auth, staff only): dashboard, post list with search/filters/publish/delete, a Tiptap rich-text editor with inline image upload, cover images, tag create-on-the-fly, a full SEO panel (meta fields, live Google/social previews, real-time checklist), localStorage autosave, comment moderation with bulk approve, and category/tag management — all Persian/RTL and `noindex`.
-- Authored HTML is sanitized server-side with `nh3` on every save, so nothing unsafe reaches the article page.
-- Django admin with slug prepopulation, bulk publish/approve actions.
+### ورود به پنل نویسندگی
 
-### Signing in to the panel
+دستور `seed_blog` یک نویسندهٔ نمونه می‌سازد: نام کاربری `demo_author` و رمز `demo12345`. وارد <http://localhost:5173/login> شوید؛ لینک پنل در هدر سایت ظاهر می‌شود. پنل به بک‌اند جنگو نیاز دارد — نسخهٔ نمایشی گیت‌هاب پیجز به‌جای آن پیام راهنما نشان می‌دهد.
 
-`python manage.py seed_blog` creates a staff user `demo_author` / `demo12345`. Visit
-http://localhost:5173/login, sign in, and the panel link appears in the site header.
-The panel needs the Django backend — the static GitHub Pages demo shows a Persian
-notice instead.
+## تست‌ها
 
-## Tests
+<div dir="ltr">
 
 ```bash
-cd backend && python manage.py test    # API, SEO endpoints, moderation
-cd frontend && npm run build           # type-checks and builds
+cd backend && python manage.py test    # API، سئو، دیدگاه‌ها و پنل
+cd frontend && npm run build           # بررسی تایپ‌ها و بیلد
 ```
 
-## License
+</div>
+
+## مستندات
+
+- [`docs/BACKEND_BRIEF.md`](docs/BACKEND_BRIEF.md) — بریف ساخت بک‌اند مستقل بر اساس قرارداد API
+- [`docs/BLOG_INTEGRATION_BRIEF.md`](docs/BLOG_INTEGRATION_BRIEF.md) — بریف افزودن این بلاگ به یک وبسایت موجود
+- [`frontend/README.md`](frontend/README.md) — جزئیات فرانت، حالت دموی استاتیک و بازسازی اسنپ‌شات
+
+## مجوز
 
 MIT
+
+</div>
