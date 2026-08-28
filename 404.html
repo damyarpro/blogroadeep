@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/blogroadeep/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0d0d" media="(prefers-color-scheme: dark)" />
+    <title>بلاگ رودیپ</title>
+    <script>
+      // Apply saved theme before paint to avoid a light/dark flash.
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = saved === 'dark' || saved === 'light' ? saved : (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/blogroadeep/assets/index-CfNOX_gn.js"></script>
+    <link rel="modulepreload" crossorigin href="/blogroadeep/assets/rolldown-runtime-B0Z9INg1.js">
+    <link rel="modulepreload" crossorigin href="/blogroadeep/assets/Seo-C1GJnRH5.js">
+    <link rel="modulepreload" crossorigin href="/blogroadeep/assets/auth-DJCIC3y7.js">
+    <link rel="stylesheet" crossorigin href="/blogroadeep/assets/index-D3KfjKK8.css">
+  </head>
+  <body class="bg-bone-100 text-ink-950 dark:bg-ink-950 dark:text-bone-100">
+    <div id="root"></div>
+  </body>
+</html>
