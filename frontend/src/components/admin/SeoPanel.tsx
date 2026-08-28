@@ -75,7 +75,7 @@ function CheckRow({ check }: { check: SeoCheck }) {
       <div className="min-w-0">
         <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
           {check.label}
-          <span className="sr-only"> — {marks.title}</span>
+          <span className="sr-only">: {marks.title}</span>
         </p>
         <p className="text-xs leading-6 text-slate-500 dark:text-slate-400">{check.detail}</p>
       </div>

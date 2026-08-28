@@ -7,7 +7,7 @@ export function PostCard({ post }: { post: PostSummary }) {
   const readingTime = formatReadingTime(post.reading_time);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-black/30">
+    <article className="lift group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white hover:shadow-lg hover:shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-black/30">
       <Link to={`/articles/${post.slug}`} className="block">
         <CoverImage src={post.cover_image} alt={post.title} className="h-44 w-full" />
       </Link>
@@ -15,13 +15,13 @@ export function PostCard({ post }: { post: PostSummary }) {
         {post.category && (
           <Link
             to={`/articles?category=${post.category.slug}`}
-            className="w-fit rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
+            className="press w-fit rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 transition-colors duration-150 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
           >
             {post.category.name}
           </Link>
         )}
         <h3 className="text-lg font-bold leading-snug text-slate-900 dark:text-white">
-          <Link to={`/articles/${post.slug}`} className="hover:text-indigo-600 dark:hover:text-indigo-400">
+          <Link to={`/articles/${post.slug}`} className="transition-colors duration-150 hover:text-indigo-600 dark:hover:text-indigo-400">
             {post.title}
           </Link>
         </h3>
